@@ -1,8 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using gestion_lotes.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+var connectionString = builder.Configuration.GetConnectionString("MySql");
+// 2. Especifica la versión del servidor
+var serverVersion = new MySqlServerVersion(new Version(10, 4, 27));
 
+// 3. Registra el DbContext en el contenedor de servicios
+//    Aquí es donde EF Core "aprende" a conectarse a tu BD MySQL.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySql(connectionString, serverVersion)
+);
+builder.Services.AddScoped<IUsuarioRepositorio, RepositorioUsuario>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

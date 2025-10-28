@@ -1,0 +1,222 @@
+@model List<gestion_lotes.Models.Usuarios>
+@{
+    ViewData["Title"] = "Usuarios";
+}
+<div class="container mt-5" style="padding-top: 10px;">
+<div class="row">
+<div class="col-md-12 history bg-light border-right">
+<h1>Usuarios</h1>
+<div class="table-responsive">
+<table class="table table-hover table-sm">
+<thead>
+    <tr>
+    <th scope="col">#</th>
+    <th scope="col">Nombre</th>
+    <th scope="col">Apellido</th>
+    <th scope="col">Email</th>
+    <th scope="col">Rol</th>
+    <th scope="col">Fecha de Creacion</th>
+    <th scope="col">Avatar</th>
+    <th scope="col">Accion</th>
+    </tr>
+</thead>
+<tbody>
+@if (Model != null && Model.Any())
+{
+    int i = 1;
+    foreach (var p in Model)
+    {
+        <tr>
+            <td>@i</td>
+            <td>@Html.DisplayFor(modelp => p.nombre)</td>
+            <td>@Html.DisplayFor(modelp => p.apellido)</td>
+            <td>@Html.DisplayFor(modelp => p.email)</td>
+            <td></td>
+            <td>@p.fecha_creacion.ToString("dd/MM/yyyy")</td>
+            <td>
+            @if (!string.IsNullOrEmpty(p.avatarUrl))
+            {
+                <img src="@p.avatarUrl" alt="avatar" width="30" height="20" style="object-fit:cover;" />
+            }
+            else
+            {
+                <span>Sin imagen</span>
+            }
+            </td>
+            <td>
+    <div class="dropdown position-static">
+        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-three-dots-vertical"></i> <!-- Icono de 3 puntos -->
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" asp-action="Edicion" asp-route-id="@p.id_usuario" title="Editar">
+                     <i class="fa-solid fa-pencil"></i> Modificar
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0);" 
+                      data-id="@p.id_usuario" 
+                      class="dropdown-item" 
+                      onclick="confirmDelete(this)">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                  </a>
+            </li>
+        </ul>
+    </div>
+</td>
+        </tr>
+        i++;
+    }
+}
+else
+{
+    <tr>
+        <td colspan="8" class="text-center text-muted">No hay usuarios cargados</td>
+    </tr>
+}
+</tbody>
+</table>
+</div>
+<button type="button" class="btn btn-primary agregar" data-bs-toggle="modal" data-bs-target="#agregarModal"><i class="fa-solid fa-plus"></i></button>
+</div>
+</div>
+</div>
+<!-- PAGINACIÓN -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <!-- Botón Anterior -->
+        <li class="page-item @(ViewBag.PaginaActual == 1 || !ViewBag.Registros ? "disabled" : "")">
+            <a class="page-link" 
+               href="@Url.Action("Index", new { pagina = ViewBag.PaginaActual - 1 })" 
+               tabindex="-1">
+                Anterior
+            </a>
+        </li>
+
+        <!-- Números de página -->
+        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                <a class="page-link" href="@Url.Action("Index", new { pagina = i })">@i</a>
+            </li>
+        }
+
+        <!-- Botón Siguiente -->
+        <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas || !ViewBag.Registros ? "disabled" : "")">
+            <a class="page-link" 
+               href="@Url.Action("Index", new { pagina = ViewBag.PaginaActual + 1 })">
+                Siguiente
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- Modal -->
+<div class="modal fade" id="agregarModal" tabindex="-1" aria-labelledby="agregarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="agregarModalLabel">Agregar Usuario</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+<form asp-action="Agregar" method="post" class="needs-validation" novalidate>
+    <div class="col-md-12">
+            <h1>Register</h1>
+        </div>
+        <div class="col-md-12">
+            <label for="Nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="Nombre" name="Nombre" required>
+            <div class="invalid-feedback">El Nombre es obligatorio.</div>
+        </div>
+        <div class="col-md-12">
+            <label for="Apellido" class="form-label">Apellido</label>
+            <input type="text" class="form-control" id="Apellido" name="Apellido" required>
+            <div class="invalid-feedback">El Apellido es obligatorio.</div>
+        </div>
+        <div class="col-md-12">
+            <label for="Email" class="form-label">Email</label>
+            <input type="Email" class="form-control" id="Email" name="Email" required>
+            <div class="invalid-feedback">El Email es obligatorio.</div>
+        </div>
+        <div class="col-md-12">
+            <label for="Password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="Password" name="Clave" required>
+            <div class="invalid-feedback">El Password es obligatorio.</div>
+        </div>
+        <div class="col-md-12">
+            <label for="AvatarFile" class="form-label">Avatar (opcional)</label>
+            <input class="form-control form-control-sm" id="AvatarFile" name="AvatarFile" type="file">
+        </div>
+        <div class="col-md-12">
+            <label for="Rol" class="form-label">Rol</label>
+            <select class="form-select" required aria-label="select example" id="Rol" name="Rol">
+              <option value="2" selected>Empleado</option>
+              <option value="1">Administrador</option>
+            </select>
+            <div class="invalid-feedback">El Rol es obligatorio.</div>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">Registrar</button>
+        </div>
+</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Sistema</strong>
+      <small class="text-muted">justo ahora</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+    <div class="toast-body">
+      @TempData["Mensaje"]
+    </div>
+  </div>
+</div>
+<!-- Modal eliminar-->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este usuario?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var toastElement = document.getElementById("successToast");
+    var toast = new bootstrap.Toast(toastElement);
+    
+    @if (TempData["Mensaje"] != null)
+    {
+        <text>
+            toast.show();
+        </text>
+    }
+
+});
+function confirmDelete(element) {
+    var id = element.getAttribute("data-id");
+    var url = "@Url.Action("Eliminar", "Usuario")" + "/" + id;
+    document.getElementById("confirmDeleteButton").setAttribute("href", url);
+    var myModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+    myModal.show();
+}
+
+</script>

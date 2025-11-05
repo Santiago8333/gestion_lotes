@@ -38,7 +38,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item" :href="'/Usuario/Edicion/' + usuario.id_usuario" title="Editar">
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(usuario)">
                                                 <i class="fa-solid fa-pencil"></i> Modificar
                                             </a>
                                         </li>
@@ -103,35 +103,36 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form asp-action="Agregar" method="post" class="needs-validation" id="formAgregarUsuario" novalidate>
+      <form v-on:submit.prevent="crearUsuario" class="needs-validation" id="formAgregarUsuario" enctype="multipart/form-data" novalidate>
+      @Html.AntiForgeryToken()
         <div class="modal-body">
             <div class="mb-3">
                 <label for="Nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="Nombre" name="Nombre" required>
+                <input type="text" class="form-control" id="nombre" name="nombre" required>
                 <div class="invalid-feedback">El Nombre es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="Apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="Apellido" name="Apellido" required>
+                <input type="text" class="form-control" id="apellido" name="apellido" required>
                 <div class="invalid-feedback">El Apellido es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="Email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="Email" name="Email" required>
+                <input type="email" class="form-control" id="email" name="email" required>
                 <div class="invalid-feedback">Por favor, ingresa un email válido.</div>
             </div>
             <div class="mb-3">
                 <label for="Password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="Password" name="Clave" required>
+                <input type="password" class="form-control" id="password" name="clave" required>
                 <div class="invalid-feedback">La contraseña es obligatoria.</div>
             </div>
             <div class="mb-3">
                 <label for="AvatarFile" class="form-label">Avatar (opcional)</label>
-                <input class="form-control" id="AvatarFile" name="AvatarFile" type="file">
+                <input class="form-control" id="avatarFile" name="avatarFile" type="file">
             </div>
             <div class="mb-3">
                 <label for="Rol" class="form-label">Rol</label>
-                <select class="form-select" id="Rol" name="Rol" required>
+                <select class="form-select" id="rol" name="rol" required>
                     <option value="" disabled>Selecciona un rol...</option>
                     <option value="2" selected>Empleado</option>
                     <option value="1">Administrador</option>
@@ -143,12 +144,71 @@
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary" form="formAgregarUsuario">Registrar</button>
+        <button type="submit" id="btncrearUsuario" class="btn btn-primary" form="formAgregarUsuario">Registrar</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal modificar -->
+<div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Usuario</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <form v-on:submit.prevent="modificarUsuario" class="needs-validation" id="formModificarUsuario" enctype="multipart/form-data" novalidate>
+      @Html.AntiForgeryToken()
+        <div class="modal-body" v-if="usuarioAModificar">
+        <input type="hidden" name="id_usuario" v-model="usuarioAModificar.id_usuario" />
+            <div class="mb-3">
+                <label for="mod_nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="mod_nombre" name="nombre" v-model="usuarioAModificar.nombre" required>
+                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+            </div>
+            <div class="mb-3">
+                <label for="mod_apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="mod_apellido" name="apellido" v-model="usuarioAModificar.apellido" required>
+                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+            </div>
+            <div class="mb-3">
+                <label for="mod_email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="mod_email" name="email" v-model="usuarioAModificar.email" required>
+                <div class="invalid-feedback">Por favor, ingresa un email válido.</div>
+            </div>
+            <div class="mb-3">
+                <label for="mod_password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="mod_password" v-model="usuarioAModificar.clave" name="clave">
+            </div>
+            <div class="mb-3">
+                <label for="mod_AvatarFile" class="form-label">Avatar (opcional)</label>
+                <div class="mb-2">
+                    <img v-if="usuarioAModificar.avatarUrl" :src="usuarioAModificar.avatarUrl" alt="avatar actual" width="40" height="30" style="object-fit:cover;" />
+                    <span v-else>Sin imagen</span>
+                </div>
+                <input class="form-control" id="mod_AvatarFile" name="avatarFile" type="file">
+            </div>
+            <div class="mb-3">
+                <label for="mod_Rol" class="form-label">Rol</label>
+                <select class="form-select" id="mod_Rol" name="rol" v-model="usuarioAModificar.rol" required>
+                    <option value="" disabled>Selecciona un rol...</option>
+                    <option value="2">Empleado</option>
+                    <option value="1">Administrador</option>
+                </select>
+                <div class="invalid-feedback">El Rol es obligatorio.</div>
+            </div>
+        </div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" id="btnmodificarUsuario" class="btn btn-primary" form="formModificarUsuario">Modificar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
@@ -171,6 +231,9 @@
                 totalPaginas: 0,
                 usuarioAEliminar: null,
                 modalEliminar: null,
+                modalAgregar: null,
+                modalModificar: null,
+                usuarioAModificar: null,
                 toast: null
             };
         },
@@ -185,6 +248,14 @@
             const toastEl = document.getElementById('successToast');
             if (toastEl) {
                 this.toast = new bootstrap.Toast(toastEl);
+            }
+            const modalAgregarEl = document.getElementById('agregarModal');
+            if (modalAgregarEl) {
+                this.modalAgregar = new bootstrap.Modal(modalAgregarEl);
+            }
+            const modalModificarEl = document.getElementById('modificarModal');
+            if (modalModificarEl) {
+                this.modalModificar = new bootstrap.Modal(modalModificarEl);
             }
         },
         methods: {
@@ -217,6 +288,12 @@
                 this.usuarioAEliminar = usuario;
                 this.modalEliminar.show();
             },
+            mostrarModalModificar(usuario) {
+                this.usuarioAModificar = {...usuario};
+                console.log(this.usuarioAModificar);
+                this.usuarioAModificar.clave = ""; 
+                this.modalModificar.show();
+            },
             async confirmarEliminacion() {
                 if (!this.usuarioAEliminar) return;
 
@@ -232,7 +309,7 @@
                     this.modalEliminar.hide();
                     this.mostrarToast(data.mensaje || 'Usuario eliminado');
                     this.cargarUsuarios();
-                    
+                    this.cambiarPagina(1);
                 } catch (error) {
                     console.error('Error al eliminar:', error);
                 }
@@ -241,6 +318,38 @@
                 const toastBody = document.querySelector('#successToast .toast-body');
                 if(toastBody) toastBody.textContent = mensaje;
                 this.toast.show();
+            },
+            async crearUsuario() {
+                const form = document.getElementById('formAgregarUsuario');
+                // FormData es esencial para enviar archivos (AvatarFile)
+                const formData = new FormData(form);
+
+                try {
+                    // Usamos la misma ruta base '/api/usuarios' pero con método POST
+                    const response = await fetch('/api/usuarios', {
+                        method: 'POST',
+                        body: formData
+                        // No necesitas 'Content-Type', FormData lo maneja solo
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        // Si la API devuelve un error (ej. 400, 500)
+                        throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                    }
+
+                    // ¡Éxito!
+                    this.modalAgregar.hide(); // Ocultamos el modal
+                    this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
+                    this.cargarUsuarios(); // Recargamos la tabla (sin recargar la página)
+                    form.reset(); // Limpiamos el formulario
+
+                } catch (error) {
+                    console.error('Error al crear usuario:', error);
+                    this.modalAgregar.hide();
+                    this.mostrarToast(error.message);
+                }
             }
         }
     };
@@ -258,6 +367,13 @@
             e.preventDefault(); 
             // Usamos la instancia global que creamos antes
             window.appInstance.confirmarEliminacion();
+        });
+    }
+    const btncrearUsuario = document.getElementById('btncrearUsuario');
+    if (btncrearUsuario) {
+        btncrearUsuario.addEventListener('click', function(e) {
+            e.preventDefault(); 
+            window.appInstance.crearUsuario();
         });
     }
 

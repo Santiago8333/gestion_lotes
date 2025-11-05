@@ -10,6 +10,7 @@ namespace gestion_lotes.Models
         Task<Usuarios?> ObtenerPorId(int id); // Usamos '?' porque puede devolver null
         Task<int> EliminarDirecto(int id);
         Task<Usuarios> Agregar(Usuarios usuario);
+        Task<Usuarios> ObtenerPorEmailAsync(string email);
     }
 
     public class RepositorioUsuario : IUsuarioRepositorio
@@ -50,5 +51,10 @@ namespace gestion_lotes.Models
 
             return usuario;
         }
+    public async Task<Usuarios> ObtenerPorEmailAsync(string email)
+    {
+        return await _context.Usuarios
+            .FirstOrDefaultAsync(u => u.email.ToLower() == email.ToLower());
+    }
     }
 }

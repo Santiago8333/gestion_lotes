@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Google.Protobuf.WellKnownTypes;
 namespace gestion_lotes.Controllers;
 
 
@@ -67,8 +68,32 @@ public IActionResult Index()
 
                 return NotFound(new { mensaje = "El usuario no fue encontrado." });
             }
+            const string defaultAvatarName = "default-avatar.png";
+            bool isDefaultAvatar = true;
+            if (!string.IsNullOrEmpty(usuario.avatarUrl))
+            {
+                isDefaultAvatar = usuario.avatarUrl.EndsWith(defaultAvatarName);
+            }
+            if (!isDefaultAvatar && !string.IsNullOrEmpty(usuario.avatarUrl))
+            {
+                try
+                {
+                    var relativePath = usuario.avatarUrl.TrimStart('/');
+                    
+                    relativePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
 
+                    var physicalPath = Path.Combine(_environment.WebRootPath, relativePath);
 
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        System.IO.File.Delete(physicalPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al borrar avatar: {ex.Message}");
+                }
+            }
             await repo.EliminarDirecto(id);
 
             return Ok(new { mensaje = "Usuario eliminado exitosamente." });
@@ -79,41 +104,73 @@ public IActionResult Index()
             return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el usuario." });
         }
     }
-[HttpPost]
+    [HttpPost]
+ [Route("/api/usuarios")]
 [ValidateAntiForgeryToken]
-public async Task<IActionResult> Agregar([Bind("Nombre,Apellido,Email,Clave,Rol")] Usuarios usuario, IFormFile? AvatarFile)
+public async Task<IActionResult> Agregar([Bind("nombre,apellido,email,clave,rol")] Usuarios usuario, IFormFile? avatarFile)
 {
-    // Verifica si los datos recibidos del formulario son válidos
-    if (ModelState.IsValid)
-    {
-        // Lógica para manejar el archivo de avatar (si se subió uno)
-        if (AvatarFile != null && AvatarFile.Length > 0)
+        // Verifica si los datos recibidos del formulario son válidos
+        if (!ModelState.IsValid)
         {
-            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/avatars");
-            if (!Directory.Exists(uploadsDir))
-            {
-                Directory.CreateDirectory(uploadsDir);
-            }
-            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(AvatarFile.FileName);
-            string filePath = Path.Combine(uploadsDir, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await AvatarFile.CopyToAsync(stream);
-            }
-            // Guarda la ruta del archivo en el objeto usuario
-            usuario.avatarUrl = $"/uploads/avatars/{fileName}";
+            // Devolvemos un error 400 (Bad Request) con los mensajes
+            var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                         .Select(e => e.ErrorMessage);
+            return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
         }
+        var usuarioExistente = await repo.ObtenerPorEmailAsync(usuario.email); 
+    
+        if (usuarioExistente != null)
+        {
+            return BadRequest(new { mensaje = "El email ingresado ya está registrado." });
+        }
+        try
+        {
+            // Lógica para manejar el archivo de avatar (si se subió uno)
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var uploadsDir = Path.Combine(_environment.WebRootPath, "images", "avatars");
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+                string filePath = Path.Combine(uploadsDir, fileName);
 
-        // Llama al método del repositorio para agregar el usuario
-        await repo.Agregar(usuario);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(stream);
+                }
+                // Guarda la ruta del archivo en el objeto usuario
+                usuario.avatarUrl = $"/images/avatars/{fileName}";
+            }
+            else
+            {
+                usuario.avatarUrl = "/images/avatars/default-avatar.png";
+            }
+            // Hashea la contraseña antes de guardarla
+            var saltString = config["Salt"];
+            if (string.IsNullOrEmpty(saltString))
+            {
+                throw new InvalidOperationException("El valor 'Salt' no está configurado en el archivo de configuración.");
+            }
+            //Console.WriteLine("dentro: " + nuevoUsuario);
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: usuario.clave,
+                salt: System.Text.Encoding.ASCII.GetBytes(saltString),
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 1000,
+                numBytesRequested: 256 / 8));
+            usuario.clave = hashed;
+            usuario.fecha_creacion = DateTime.Now;
+            // Llama al método del repositorio para agregar el usuario
+            await repo.Agregar(usuario);
 
-        // Redirige al usuario a la página principal de usuarios
-        return RedirectToAction(nameof(Index));
-    }
-
-    // Si el modelo no es válido, vuelve a mostrar la vista del formulario
-    // con los datos que el usuario ya había ingresado.
-    return View(usuario);
+            return Ok(new { mensaje = "¡Usuario agregado exitosamente!" });
+        }
+        catch (Exception ex)
+        {
+            // 7. Devolver respuesta JSON de ERROR
+            return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+        }
 }
 }

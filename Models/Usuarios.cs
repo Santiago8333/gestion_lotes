@@ -8,7 +8,6 @@ public class Usuarios
     [Key]
     public int id_usuario { get; set; }
 
-    // 2. Campo requerido y con longitud máxima
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     [StringLength(50)]
     public string nombre { get; set; } = "";
@@ -18,12 +17,12 @@ public class Usuarios
     public string apellido { get; set; } = "";
 
     [Required]
-    [EmailAddress] // 3. Validación de formato de email
+    [EmailAddress] 
     [StringLength(100)]
     public string email { get; set; } = "";
     
-    // 4. Convertido a propiedad y nulable
-    [StringLength(255)] // Longitud para una URL
+
+    [StringLength(255)] 
     public string? avatarUrl { get; set; }
 
     [NotMapped]
@@ -33,7 +32,7 @@ public class Usuarios
     public int rol { get; set; }
 
     [Required]
-    [StringLength(255)] // Una longitud apropiada para un hash de contraseña
+    [StringLength(255)] 
     public string clave { get; set; } = "";
 
     [NotMapped]
@@ -41,7 +40,7 @@ public class Usuarios
 
     public bool estado { get; set; }
 
-    // 5. Nombre de columna explícito (opcional)
+
     [Column("fecha_creacion")]
     public DateTime fecha_creacion { get; set; }
 }

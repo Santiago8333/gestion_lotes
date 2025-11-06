@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Usuario Login";
+}
+<div id="app" class="container mt-5" style="padding-top: 10px;">
+<div class="container form-container d-flex justify-content-center align-items-center">
+    <form class="row g-4 col-md-4 needs-validation" v-on:submit.prevent="handleLogin" novalidate>
+        <div class="col-md-12">
+            <h1>Login</h1>
+        </div>
+        <div class="col-md-12">
+            <label for="Email" class="form-label">Email</label>
+            <input type="Email" class="form-control" id="Email" v-model="loginEmail" required>
+            <div class="invalid-feedback">El Email es obligatorio.</div>
+        </div>
+        <div class="col-md-12">
+            <label for="Clave" class="form-label">Password</label>
+            <input type="password" class="form-control" id="Clave" v-model="loginClave" required>
+            <div class="invalid-feedback">El Password es obligatorio.</div>
+        </div>
+
+        <div v-if="loginError" class="col-12 alert alert-danger" role="alert">
+            {{ loginError }}
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">Login</button>
+        </div>
+    </form>
+</div>
+<!--toats sietama-->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Sistema</strong>
+      <small class="text-muted">justo ahora</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+    <div class="toast-body">
+      @TempData["Mensaje"]
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var toastElement = document.getElementById("successToast");
+        var toast = new bootstrap.Toast(toastElement);
+        
+        @if (TempData["Mensaje"] != null)
+        {
+            <text>
+                toast.show();
+            </text>
+        }
+    });
+</script>
+@section Scripts {
+<script>
+    const appConfig = {
+        data() {
+            return {
+                loginEmail: '',
+                loginClave: '',
+                loginError: null
+
+            };
+        },
+        mounted() {
+            
+        },
+        methods: {
+            
+            async handleLogin() {
+                this.loginError = null;
+
+                try {
+                    const response = await fetch('@Url.Action("Login")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: this.loginEmail,
+                            clave: this.loginClave
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                        } else {
+                            
+                            window.location.href = '/Home'; 
+                        }
+                    } else {
+                      
+                        this.loginError = data.message || 'Email o contraseña incorrectos.';
+                    }
+                } catch (error) {
+                    console.error('Error en el login:', error);
+                    this.loginError = 'Ocurrió un error de red. Intenta de nuevo.';
+                }
+            }
+        }
+    };
+
+    const app = Vue.createApp(appConfig);
+    window.appInstance = app.mount('#app');
+    
+
+</script>
+}

@@ -74,9 +74,7 @@
             </li>
         </ul>
     </nav>
-    
-</div>
-<!-- Modal eliminar-->
+    <!-- Modal eliminar-->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -179,7 +177,7 @@
                 <div class="invalid-feedback">Por favor, ingresa un email válido.</div>
             </div>
             <div class="mb-3">
-                <label for="mod_password" class="form-label">Password</label>
+                <label for="mod_password" class="form-label">Password (opcional)</label>
                 <input type="password" class="form-control" id="mod_password" v-model="usuarioAModificar.clave" name="clave">
             </div>
             <div class="mb-3">
@@ -220,6 +218,11 @@
       @TempData["Mensaje"]
     </div>
   </div>
+
+
+</div>
+
+
 @section Scripts {
 <script>
 
@@ -290,7 +293,7 @@
             },
             mostrarModalModificar(usuario) {
                 this.usuarioAModificar = {...usuario};
-                console.log(this.usuarioAModificar);
+                //console.log(this.usuarioAModificar);
                 this.usuarioAModificar.clave = ""; 
                 this.modalModificar.show();
             },
@@ -349,6 +352,39 @@
                     console.error('Error al crear usuario:', error);
                     this.modalAgregar.hide();
                     this.mostrarToast(error.message);
+                }
+            },
+            async modificarUsuario() {
+                
+                const form = document.getElementById('formModificarUsuario');
+                const formData = new FormData(form);
+                
+                
+
+                try {
+                    // 2. Enviar la petición a la API
+                    const response = await fetch(`/api/usuarios/${this.usuarioAModificar.id_usuario}`, {
+                        method: 'PUT', 
+                        body: formData
+                      
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.mensaje || 'Error al modificar el usuario.');
+                    }
+
+                    
+                    this.modalModificar.hide(); 
+                    this.mostrarToast(data.mensaje); 
+                    this.cargarUsuarios(); 
+                    document.getElementById('mod_AvatarFile').value = "";
+                    
+                } catch (error) {
+                    console.error('Error al modificar usuario:', error);
+                    this.modalModificar.hide();
+                    this.mostrarToast(error.message); // [cite: 60]
                 }
             }
         }

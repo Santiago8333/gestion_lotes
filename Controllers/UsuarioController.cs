@@ -105,10 +105,10 @@ public IActionResult Index()
         }
     }
     [HttpPost]
- [Route("/api/usuarios")]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Agregar([Bind("nombre,apellido,email,clave,rol")] Usuarios usuario, IFormFile? avatarFile)
-{
+    [Route("/api/usuarios")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Agregar([Bind("nombre,apellido,email,clave,rol")] Usuarios usuario, IFormFile? avatarFile)
+    {
         // Verifica si los datos recibidos del formulario son válidos
         if (!ModelState.IsValid)
         {
@@ -117,8 +117,8 @@ public async Task<IActionResult> Agregar([Bind("nombre,apellido,email,clave,rol"
                                          .Select(e => e.ErrorMessage);
             return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
         }
-        var usuarioExistente = await repo.ObtenerPorEmailAsync(usuario.email); 
-    
+        var usuarioExistente = await repo.ObtenerPorEmailAsync(usuario.email);
+
         if (usuarioExistente != null)
         {
             return BadRequest(new { mensaje = "El email ingresado ya está registrado." });
@@ -172,5 +172,124 @@ public async Task<IActionResult> Agregar([Bind("nombre,apellido,email,clave,rol"
             // 7. Devolver respuesta JSON de ERROR
             return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
         }
+    }
+[HttpPut] 
+[Route("/api/usuarios/{id_usuario:int}")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Modificar(int id_usuario, 
+    [Bind("id_usuario,nombre,apellido,email,clave,rol")] Usuarios usuario, 
+    IFormFile? avatarFile)
+{
+    ModelState.Remove("clave");
+    if (id_usuario != usuario.id_usuario)
+    {
+        return BadRequest(new { mensaje = "Inconsistencia en el ID del usuario." });
+    }
+
+   
+    if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                     .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+
+    
+    var usuarioExistente = await repo.ObtenerPorEmailAsync(usuario.email);
+    if (usuarioExistente != null && usuarioExistente.id_usuario != usuario.id_usuario)
+    {
+        return BadRequest(new { mensaje = "El email ingresado ya está registrado por otro usuario." });
+    }
+    var usuarioEnDb = await repo.ObtenerPorId(usuario.id_usuario);
+    if (usuarioEnDb == null)
+    {
+        return NotFound(new { mensaje = "El usuario que intentas modificar no existe." });
+    }
+    try
+    {
+
+        string avatarAntiguoUrl = usuarioEnDb.avatarUrl;
+
+    // 3. Tu código para manejar el NUEVO archivo
+    if (avatarFile != null && avatarFile.Length > 0)
+    {
+        var uploadsDir = Path.Combine(_environment.WebRootPath, "images", "avatars");
+        if (!Directory.Exists(uploadsDir))
+        {
+            Directory.CreateDirectory(uploadsDir);
+        }
+        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+        string filePath = Path.Combine(uploadsDir, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await avatarFile.CopyToAsync(stream);
+        }
+        
+        
+        usuario.avatarUrl = $"/images/avatars/{fileName}"; 
+        
+       
+        if (!string.IsNullOrEmpty(avatarAntiguoUrl) && 
+            avatarAntiguoUrl != "/images/avatars/default-avatar.png") // No borrar el default
+        {
+            try
+            {
+                
+                string nombreArchivoAntiguo = Path.GetFileName(avatarAntiguoUrl);
+                string rutaFisicaAntigua = Path.Combine(uploadsDir, nombreArchivoAntiguo);
+
+                if (System.IO.File.Exists(rutaFisicaAntigua))
+                {
+                    System.IO.File.Delete(rutaFisicaAntigua);
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                Console.WriteLine($"Error al eliminar avatar antiguo: {ex.Message}");
+            }
+        }
+    }
+    else
+    {
+        
+        usuario.avatarUrl = avatarAntiguoUrl;
+    }
+
+        if (!string.IsNullOrEmpty(usuario.clave))
+        {
+            var saltString = config["Salt"];
+            if (string.IsNullOrEmpty(saltString))
+            {
+                throw new InvalidOperationException("El valor 'Salt' no está configurado.");
+            }
+            
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: usuario.clave,
+                salt: System.Text.Encoding.ASCII.GetBytes(saltString),
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 1000,
+                numBytesRequested: 256 / 8));
+            usuario.clave = hashed;
+            }
+            else
+            {
+                usuario.clave = usuarioEnDb.clave;
+            }
+
+        var usuarioModificado = await repo.Modificar(usuario);
+
+        if (usuarioModificado == null)
+        {
+            return NotFound(new { mensaje = "Usuario no encontrado." });
+        }
+
+        return Ok(new { mensaje = "¡Usuario modificado exitosamente!" });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
 }
 }

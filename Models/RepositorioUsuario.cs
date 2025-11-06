@@ -11,6 +11,7 @@ namespace gestion_lotes.Models
         Task<int> EliminarDirecto(int id);
         Task<Usuarios> Agregar(Usuarios usuario);
         Task<Usuarios> ObtenerPorEmailAsync(string email);
+        Task<Usuarios> Modificar(Usuarios usuario);
     }
 
     public class RepositorioUsuario : IUsuarioRepositorio
@@ -51,10 +52,40 @@ namespace gestion_lotes.Models
 
             return usuario;
         }
-    public async Task<Usuarios> ObtenerPorEmailAsync(string email)
+        public async Task<Usuarios> ObtenerPorEmailAsync(string email)
+        {
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.email.ToLower() == email.ToLower());
+        }
+        public async Task<Usuarios> Modificar(Usuarios usuario)
     {
-        return await _context.Usuarios
-            .FirstOrDefaultAsync(u => u.email.ToLower() == email.ToLower());
+
+        var usuarioEnDb = await _context.Usuarios.FindAsync(usuario.id_usuario);
+
+        if (usuarioEnDb == null)
+        {
+            return null;
+        }
+
+        usuarioEnDb.nombre = usuario.nombre; 
+        usuarioEnDb.apellido = usuario.apellido; 
+        usuarioEnDb.email = usuario.email; 
+        usuarioEnDb.rol = usuario.rol;
+
+
+        if (!string.IsNullOrEmpty(usuario.clave))
+        {
+            usuarioEnDb.clave = usuario.clave; 
+        }
+
+        if (!string.IsNullOrEmpty(usuario.avatarUrl))
+        {
+            usuarioEnDb.avatarUrl = usuario.avatarUrl; 
+        }
+        
+        await _context.SaveChangesAsync();
+
+        return usuarioEnDb;
     }
     }
 }

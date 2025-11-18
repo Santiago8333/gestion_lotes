@@ -340,8 +340,8 @@ public async Task<IActionResult> Login([FromBody] LoginViewModel loginModel)
     {
         AvatarUrl = "/uploads/avatars/default.png"; 
     }
-    string rolNombre = "Empleado"; // Valor por defecto
-    if (e.rol == 1) // Asumiendo que 1 es Administrador
+    string rolNombre = "Empleado"; 
+    if (e.rol == 1) 
     {
         rolNombre = "Administrador";
     }
@@ -366,7 +366,7 @@ public async Task<IActionResult> Login([FromBody] LoginViewModel loginModel)
     { 
         success = true, 
         message = "Login exitoso",
-        redirectUrl = Url.Action("Index", "Home") // Le decimos a Vue a dónde ir
+        redirectUrl = Url.Action("Index", "Home") 
     });
 }
 }

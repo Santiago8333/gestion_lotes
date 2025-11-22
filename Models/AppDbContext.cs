@@ -17,7 +17,7 @@ namespace gestion_lotes.Models
         // agrega una propiedad DbSet.
 
         public DbSet<Usuarios> Usuarios { get; set; }
-
+        public DbSet<Lotes> Lotes { get; set; }
         // Opcional: Puedes agregar configuraciones adicionales aquí si es necesario
         // protected override void OnModelCreating(ModelBuilder modelBuilder)
         // {

@@ -25,4 +25,31 @@ public class LoteController : Controller
         _environment = environment;
 
     }
+public IActionResult Index()
+{
+    return View(); 
+}
+[HttpGet]
+[Route("api/lotes")]
+public async Task<IActionResult> ObtenerLotes(int pagina = 1)
+{
+    int registrosPorPagina = 10;
+
+    var consultaLotes = repo.ObtenerTodos().OrderBy(u => u.n_lote);
+    var totalDeRegistros = await consultaLotes.CountAsync();
+
+    var lotesPaginados = await consultaLotes
+                                    .Skip((pagina - 1) * registrosPorPagina)
+                                    .Take(registrosPorPagina)
+                                    .ToListAsync();
+
+    var resultado = new
+    {
+        PaginaActual = pagina,
+        TotalPaginas = (int)Math.Ceiling((double)totalDeRegistros / registrosPorPagina),
+        Lotes = lotesPaginados
+    };
+
+    return Ok(resultado);
+}
 }

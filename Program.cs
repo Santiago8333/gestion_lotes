@@ -16,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );
 builder.Services.AddScoped<IUsuarioRepositorio, RepositorioUsuario>();
+builder.Services.AddScoped<ILoteRepositorio, RepositorioLote>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>//el sitio web valida con cookie
 	{

@@ -11,19 +11,24 @@
                         <tr>
                             <th scope="col">#</th>
                             <th scope="col">Numero de Lote</th>
-                            <th scope="col">Marca Modelo</th>
+                            <th scope="col">Marca</th>
+                            <th scope="col">Modelo</th>
+                            <th scope="col">Dominio</th>
                             <th scope="col">Año</th>
+                            <th scope="col">Base</th>
                             <th scope="col">Fecha de Creación</th>
                             <th scope="col">Acción</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(usuario, index) in usuarios" :key="usuario.id_usuario">
+                        <tr v-for="(lote, index) in lotes" :key="lote.id_lote">
                             <td>{{ index + 1 }}</td>
                             <td>{{ lote.n_lote }}</td>
                             <td>{{ lote.marca }}</td>
                             <td>{{ lote.modelo }}</td>
+                            <td>{{ lote.dominio }}</td>
                             <td>{{ lote.anio }}</td>
+                            <td>{{ lote.base }}</td>
                             <td>{{ formatearFecha(lote.fecha_creacion) }}</td>
                             <td>
                                 <div class="dropdown position-static">
@@ -91,113 +96,72 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="agregarModalLabel">Agregar Usuario</h1>
+        <h1 class="modal-title fs-5" id="agregarModalLabel">Agregar Lote</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form v-on:submit.prevent="crearUsuario" class="needs-validation" id="formAgregarUsuario" enctype="multipart/form-data" novalidate>
-      @Html.AntiForgeryToken()
+      <form v-on:submit.prevent="crearLote" id="formAgregarLote" novalidate>
         <div class="modal-body">
             <div class="mb-3">
-                <label for="Nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" required>
-                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+                <label for="n_lote" class="form-label">Número de Lote</label>
+                <input type="number" class="form-control" id="n_lote" name="n_lote" required>
             </div>
             <div class="mb-3">
-                <label for="Apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="apellido" name="apellido" required>
-                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+                <label for="marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="marca" name="marca" required>
             </div>
             <div class="mb-3">
-                <label for="Email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
-                <div class="invalid-feedback">Por favor, ingresa un email válido.</div>
+                <label for="modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modelo" name="modelo" required>
             </div>
             <div class="mb-3">
-                <label for="Password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="clave" required>
-                <div class="invalid-feedback">La contraseña es obligatoria.</div>
-            </div>
-            <div class="mb-3">
-                <label for="AvatarFile" class="form-label">Avatar (opcional)</label>
-                <input class="form-control" id="avatarFile" name="avatarFile" type="file">
-            </div>
-            <div class="mb-3">
-                <label for="Rol" class="form-label">Rol</label>
-                <select class="form-select" id="rol" name="rol" required>
-                    <option value="" disabled>Selecciona un rol...</option>
-                    <option value="2" selected>Empleado</option>
-                    <option value="1">Administrador</option>
-                </select>
-                <div class="invalid-feedback">El Rol es obligatorio.</div>
+                <label for="anio" class="form-label">Año</label>
+                <input type="number" class="form-control" id="anio" name="anio" required>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Lote</button>
+        </div>
       </form>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" id="btncrearUsuario" class="btn btn-primary" form="formAgregarUsuario">Registrar</button>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal modificar -->
 <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Usuario</h1>
+        <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Lote</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form v-on:submit.prevent="modificarUsuario" class="needs-validation" id="formModificarUsuario" enctype="multipart/form-data" novalidate>
-      @Html.AntiForgeryToken()
-        <div class="modal-body" v-if="usuarioAModificar">
-        <input type="hidden" name="id_usuario" v-model="usuarioAModificar.id_usuario" />
+      <form v-on:submit.prevent="modificarLote" id="formModificarLote" novalidate>
+        <div class="modal-body" v-if="loteAModificar">
+            <input type="hidden" name="id_lote" v-model="loteAModificar.id_lote" />
+            
             <div class="mb-3">
-                <label for="mod_nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="mod_nombre" name="nombre" v-model="usuarioAModificar.nombre" required>
-                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+                <label for="mod_n_lote" class="form-label">Número de Lote</label>
+                <input type="number" class="form-control" id="mod_n_lote" name="n_lote" v-model="loteAModificar.n_lote" required>
             </div>
             <div class="mb-3">
-                <label for="mod_apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="mod_apellido" name="apellido" v-model="usuarioAModificar.apellido" required>
-                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+                <label for="mod_marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="mod_marca" name="marca" v-model="loteAModificar.marca" required>
             </div>
             <div class="mb-3">
-                <label for="mod_email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="mod_email" name="email" v-model="usuarioAModificar.email" required>
-                <div class="invalid-feedback">Por favor, ingresa un email válido.</div>
+                <label for="mod_modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="mod_modelo" name="modelo" v-model="loteAModificar.modelo" required>
             </div>
             <div class="mb-3">
-                <label for="mod_password" class="form-label">Password (opcional)</label>
-                <input type="password" class="form-control" id="mod_password" v-model="usuarioAModificar.clave" name="clave">
-            </div>
-            <div class="mb-3">
-                <label for="mod_AvatarFile" class="form-label">Avatar (opcional)</label>
-                <div class="mb-2">
-                    <img v-if="usuarioAModificar.avatarUrl" :src="usuarioAModificar.avatarUrl" alt="avatar actual" width="40" height="30" style="object-fit:cover;" />
-                    <span v-else>Sin imagen</span>
-                </div>
-                <input class="form-control" id="mod_AvatarFile" name="avatarFile" type="file">
-            </div>
-            <div class="mb-3">
-                <label for="mod_Rol" class="form-label">Rol</label>
-                <select class="form-select" id="mod_Rol" name="rol" v-model="usuarioAModificar.rol" required>
-                    <option value="" disabled>Selecciona un rol...</option>
-                    <option value="2">Empleado</option>
-                    <option value="1">Administrador</option>
-                </select>
-                <div class="invalid-feedback">El Rol es obligatorio.</div>
+                <label for="mod_anio" class="form-label">Año</label>
+                <input type="number" class="form-control" id="mod_anio" name="anio" v-model="loteAModificar.anio" required>
             </div>
         </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
       </form>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" id="btnmodificarUsuario" class="btn btn-primary" form="formModificarUsuario">Modificar</button>
-      </div>
     </div>
   </div>
 </div>
@@ -219,193 +183,139 @@
 
 @section Scripts {
 <script>
-
     const appConfig = {
         data() {
             return {
                 lotes: [],
                 paginaActual: 1,
                 totalPaginas: 0,
+                
+                // Variables para manejar los modales
                 loteAEliminar: null,
-                modalEliminar: null,
-                modalAgregar: null,
-                modalModificar: null,
-                loteAModificar: null,
-                toast: null
+                loteAModificar: null, // Aquí guardaremos el lote que se está editando
+                
+                // Referencias a las instancias de Bootstrap Modal
+                modalEliminarBS: null,
+                modalAgregarBS: null,
+                modalModificarBS: null,
+                
+                toastBS: null
             };
         },
         mounted() {
-            this.cargarUsuarios();
+            this.cargarLotes();
             
-            const modalEliminarEl = document.getElementById('confirmDeleteModal');
-            if (modalEliminarEl) {
-                this.modalEliminar = new bootstrap.Modal(modalEliminarEl);
-            }
-
+            // Inicializar Toast
             const toastEl = document.getElementById('successToast');
-            if (toastEl) {
-                this.toast = new bootstrap.Toast(toastEl);
-            }
-            const modalAgregarEl = document.getElementById('agregarModal');
-            if (modalAgregarEl) {
-                this.modalAgregar = new bootstrap.Modal(modalAgregarEl);
-            }
-            const modalModificarEl = document.getElementById('modificarModal');
-            if (modalModificarEl) {
-                this.modalModificar = new bootstrap.Modal(modalModificarEl);
-            }
+            if (toastEl) this.toastBS = new bootstrap.Toast(toastEl);
+            
+            // Inicializar Modales de Bootstrap para poder abrirlos/cerrarlos desde JS
+            this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
+            this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
+            this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
         },
         methods: {
-            async cargarUsuarios() {
+            // --- Carga de datos ---
+            async cargarLotes() {
                 try {
-                    const response = await fetch(`/api/usuarios?pagina=${this.paginaActual}`);
-                    if (!response.ok) throw new Error('Error al cargar los usuarios');
-                    
+                    const response = await fetch(`/api/lotes?pagina=${this.paginaActual}`);
+                    if (!response.ok) throw new Error('Error al cargar');
                     const data = await response.json();
                     
-                    this.usuarios = data.usuarios; 
+                    this.lotes = data.lotes; 
                     this.totalPaginas = data.totalPaginas;
                     this.paginaActual = data.paginaActual;
                 } catch (error) {
                     console.error('Error:', error);
                 }
             },
+
+            // --- Paginación ---
             cambiarPagina(nuevaPagina) {
                 if (nuevaPagina >= 1 && nuevaPagina <= this.totalPaginas) {
                     this.paginaActual = nuevaPagina;
-                    this.cargarUsuarios();
+                    this.cargarLotes();
                 }
             },
+
+            // --- Utilidades ---
             formatearFecha(fechaISO) {
                 if (!fechaISO) return '';
-                const fecha = new Date(fechaISO);
-                return fecha.toLocaleDateString('es-ES');
-            },
-            mostrarModalEliminar(usuario) {
-                this.usuarioAEliminar = usuario;
-                this.modalEliminar.show();
-            },
-            mostrarModalModificar(usuario) {
-                this.usuarioAModificar = {...usuario};
-                //console.log(this.usuarioAModificar);
-                this.usuarioAModificar.clave = ""; 
-                this.modalModificar.show();
-            },
-            async confirmarEliminacion() {
-                if (!this.usuarioAEliminar) return;
-
-                try {
-                    const response = await fetch(`/api/usuarios/${this.usuarioAEliminar.id_usuario}`, {
-                        method: 'DELETE'
-                    });
-
-                    if (!response.ok) throw new Error('No se pudo eliminar el usuario.');
-                    
-                    const data = await response.json();
-                    
-                    this.modalEliminar.hide();
-                    this.mostrarToast(data.mensaje || 'Usuario eliminado');
-                    this.cargarUsuarios();
-                    this.cambiarPagina(1);
-                } catch (error) {
-                    console.error('Error al eliminar:', error);
-                }
+                return new Date(fechaISO).toLocaleDateString('es-ES');
             },
             mostrarToast(mensaje) {
                 const toastBody = document.querySelector('#successToast .toast-body');
                 if(toastBody) toastBody.textContent = mensaje;
-                this.toast.show();
+                if(this.toastBS) this.toastBS.show();
             },
-            async crearUsuario() {
-                const form = document.getElementById('formAgregarUsuario');
-                // FormData es esencial para enviar archivos (AvatarFile)
-                const formData = new FormData(form);
 
-                try {
-                    // Usamos la misma ruta base '/api/usuarios' pero con método POST
-                    const response = await fetch('/api/usuarios', {
-                        method: 'POST',
-                        body: formData
-                        // No necesitas 'Content-Type', FormData lo maneja solo
-                    });
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        // Si la API devuelve un error (ej. 400, 500)
-                        throw new Error(data.mensaje || 'Error al procesar la solicitud.');
-                    }
-
-                    // ¡Éxito!
-                    this.modalAgregar.hide(); // Ocultamos el modal
-                    this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
-                    this.cargarUsuarios(); // Recargamos la tabla (sin recargar la página)
-                    form.reset(); // Limpiamos el formulario
-
-                } catch (error) {
-                    console.error('Error al crear usuario:', error);
-                    this.modalAgregar.hide();
-                    this.mostrarToast(error.message);
-                }
-            },
-            async modificarUsuario() {
-                
-                const form = document.getElementById('formModificarUsuario');
+            // --- Lógica del Modal CREAR ---
+            async crearLote() {
+                // 1. Obtener datos del form
+                const form = document.getElementById('formAgregarLote');
                 const formData = new FormData(form);
                 
+                // NOTA: Aquí deberías hacer tu fetch POST real al backend
+                // Ejemplo: await fetch('/Lote/Crear', { method: 'POST', body: formData });
                 
+                console.log("Creando lote:", Object.fromEntries(formData));
 
-                try {
-                    // 2. Enviar la petición a la API
-                    const response = await fetch(`/api/usuarios/${this.usuarioAModificar.id_usuario}`, {
-                        method: 'PUT', 
-                        body: formData
-                      
-                    });
+                // 2. Cerrar modal y limpiar
+                this.modalAgregarBS.hide();
+                form.reset();
+                
+                // 3. Notificar y recargar
+                this.mostrarToast("Lote creado exitosamente");
+                this.cargarLotes();
+            },
 
-                    const data = await response.json();
+            // --- Lógica del Modal MODIFICAR ---
+            mostrarModalModificar(lote) {
+                // Hacemos una COPIA del objeto para no editar la tabla en tiempo real
+                this.loteAModificar = { ...lote };
+                this.modalModificarBS.show();
+            },
 
-                    if (!response.ok) {
-                        throw new Error(data.mensaje || 'Error al modificar el usuario.');
-                    }
+            async modificarLote() {
+                // Aquí envías this.loteAModificar a tu backend
+                console.log("Modificando lote:", this.loteAModificar);
 
-                    
-                    this.modalModificar.hide(); 
-                    this.mostrarToast(data.mensaje); 
-                    this.cargarUsuarios(); 
-                    document.getElementById('mod_AvatarFile').value = "";
-                    
-                } catch (error) {
-                    console.error('Error al modificar usuario:', error);
-                    this.modalModificar.hide();
-                    this.mostrarToast(error.message); // [cite: 60]
-                }
+                // Ejemplo Fetch:
+                // await fetch('/Lote/Editar', { 
+                //    method: 'POST', 
+                //    headers: {'Content-Type': 'application/json'},
+                //    body: JSON.stringify(this.loteAModificar) 
+                // });
+
+                this.modalModificarBS.hide();
+                this.mostrarToast("Lote modificado exitosamente");
+                this.cargarLotes();
+            },
+
+            // --- Lógica del Modal ELIMINAR ---
+            mostrarModalEliminar(lote) {
+                this.loteAEliminar = lote;
+                this.modalEliminarBS.show();
+                
+                // Configurar el botón "Eliminar" del modal (si no usas click directo en el botón)
+                const btnEliminar = document.getElementById('confirmDeleteButton');
+                btnEliminar.onclick = () => this.eliminarLoteConfirmado();
+            },
+
+            async eliminarLoteConfirmado() {
+                if(!this.loteAEliminar) return;
+
+                console.log("Eliminando lote ID:", this.loteAEliminar.id_lote);
+                // await fetch(`/Lote/Eliminar/${this.loteAEliminar.id_lote}`, { method: 'POST' });
+
+                this.modalEliminarBS.hide();
+                this.mostrarToast("Lote eliminado");
+                this.cargarLotes();
             }
         }
     };
 
-    // 1. Crear la aplicación Vue a partir de la configuración
     const app = Vue.createApp(appConfig);
-
-    // 2. Montar la aplicación y guardar la instancia en una variable global
     window.appInstance = app.mount('#app');
-    
-    // 3. Conectar el botón del modal a la instancia de Vue que ya existe
-    const confirmDeleteBtn = document.getElementById('confirmDeleteButton');
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', function(e) {
-            e.preventDefault(); 
-            // Usamos la instancia global que creamos antes
-            window.appInstance.confirmarEliminacion();
-        });
-    }
-    const btncrearUsuario = document.getElementById('btncrearUsuario');
-    if (btncrearUsuario) {
-        btncrearUsuario.addEventListener('click', function(e) {
-            e.preventDefault(); 
-            window.appInstance.crearUsuario();
-        });
-    }
-
 </script>
 }

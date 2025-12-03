@@ -101,6 +101,7 @@
       </div>
       
       <form v-on:submit.prevent="crearLote" id="formAgregarLote" novalidate>
+      @Html.AntiForgeryToken()
         <div class="modal-body">
             <div class="mb-3">
                 <label for="n_lote" class="form-label">Número de Lote</label>
@@ -115,8 +116,16 @@
                 <input type="text" class="form-control" id="modelo" name="modelo" required>
             </div>
             <div class="mb-3">
-                <label for="anio" class="form-label">Año</label>
-                <input type="number" class="form-control" id="anio" name="anio" required>
+                <label for="dominio" class="form-label">Dominio</label>
+                <input type="text" class="form-control" id="dominio" name="dominio" required>
+            </div>
+            <div class="mb-3">
+                <label for="año" class="form-label">Año</label>
+                <input type="text" class="form-control" id="año" name="año" required>
+            </div>
+            <div class="mb-3">
+                <label for="base" class="form-label">Base</label>
+                <input type="number" class="form-control" id="base" name="base" required>
             </div>
         </div>
         <div class="modal-footer">
@@ -259,14 +268,32 @@
                 // Ejemplo: await fetch('/Lote/Crear', { method: 'POST', body: formData });
                 
                 console.log("Creando lote:", Object.fromEntries(formData));
+                try {
+                   
+                    const response = await fetch('/api/lotes', {
+                        method: 'POST',
+                        body: formData
+                        // No necesitas 'Content-Type', FormData lo maneja solo
+                    });
 
-                // 2. Cerrar modal y limpiar
-                this.modalAgregarBS.hide();
-                form.reset();
-                
-                // 3. Notificar y recargar
-                this.mostrarToast("Lote creado exitosamente");
-                this.cargarLotes();
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        // Si la API devuelve un error (ej. 400, 500)
+                        throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                    }
+
+                    // ¡Éxito!
+                    this.modalAgregarBS.hide();
+                    form.reset();
+                    this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
+                    this.cargarLotes();
+
+                } catch (error) {
+                    console.error('Error al crear lote:', error);
+                    this.modalAgregarBS.hide();
+                    this.mostrarToast(error.message);
+                }
             },
 
             // --- Lógica del Modal MODIFICAR ---

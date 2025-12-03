@@ -52,4 +52,37 @@ public async Task<IActionResult> ObtenerLotes(int pagina = 1)
 
     return Ok(resultado);
 }
+[HttpPost]
+[Route("/api/lotes")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,año,base")] Lotes lote)
+{
+    // Verifica si los datos recibidos del formulario son válidos
+    if (!ModelState.IsValid)
+    {
+        // Devolvemos un error 400 (Bad Request) con los mensajes
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+    var LoteExistente = await repo.ObtenerPorNloteAsync(lote.n_lote);
+
+    if (LoteExistente != null)
+    {
+        return BadRequest(new { mensaje = "El numero de lote ingresado ya está registrado." });
+    }
+    try
+    {
+       
+        
+        await repo.Agregar(lote);
+
+        return Ok(new { mensaje = "¡Lote agregado exitosamente!" });
+    }
+    catch (Exception ex)
+    {
+        // 7. Devolver respuesta JSON de ERROR
+        return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

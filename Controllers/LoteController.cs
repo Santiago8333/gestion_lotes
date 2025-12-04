@@ -55,9 +55,10 @@ public async Task<IActionResult> ObtenerLotes(int pagina = 1)
 [HttpPost]
 [Route("/api/lotes")]
 [ValidateAntiForgeryToken]
-public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,año,base")] Lotes lote)
+public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,anio,base")] Lotes lote)
 {
     // Verifica si los datos recibidos del formulario son válidos
+    ModelState.Remove("creado_por");
     if (!ModelState.IsValid)
     {
         // Devolvemos un error 400 (Bad Request) con los mensajes
@@ -74,7 +75,7 @@ public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,año
     try
     {
        
-        
+        lote.creado_por = User.Identity?.Name ?? "Sistema"; 
         await repo.Agregar(lote);
 
         return Ok(new { mensaje = "¡Lote agregado exitosamente!" });

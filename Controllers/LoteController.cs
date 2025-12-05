@@ -74,7 +74,7 @@ public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,anio
     }
     try
     {
-       
+        lote.fecha_creacion = DateTime.Now;
         lote.creado_por = User.Identity?.Name ?? "Sistema"; 
         await repo.Agregar(lote);
 
@@ -84,6 +84,28 @@ public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,anio
     {
         // 7. Devolver respuesta JSON de ERROR
         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
+[HttpDelete]
+[Route("api/lotes/{id}")]
+public async Task<IActionResult> EliminarLote(int id)
+{
+    try
+    {
+
+        var lote = await repo.ObtenerPorNloteAsync(id);
+        if (lote == null)
+        {
+            return NotFound(new { mensaje = "El lote no fue encontrado." });
+        }
+        
+        await repo.EliminarDirecto(id);
+
+        return Ok(new { mensaje = "Lote eliminado exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el lote."+ex });
     }
 }
 }

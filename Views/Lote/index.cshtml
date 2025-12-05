@@ -82,7 +82,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        ¿Estás seguro de que deseas eliminar este usuario?
+        ¿Estás seguro de que deseas eliminar este Lote?
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -146,6 +146,7 @@
       </div>
       
       <form v-on:submit.prevent="modificarLote" id="formModificarLote" novalidate>
+      @Html.AntiForgeryToken()
         <div class="modal-body" v-if="loteAModificar">
             <input type="hidden" name="id_lote" v-model="loteAModificar.id_lote" />
             
@@ -162,8 +163,16 @@
                 <input type="text" class="form-control" id="mod_modelo" name="modelo" v-model="loteAModificar.modelo" required>
             </div>
             <div class="mb-3">
+                <label for="mod_dominio" class="form-label">Dominio</label>
+                <input type="text" class="form-control" id="mod_dominio" name="dominio" v-model="loteAModificar.dominio" required>
+            </div>
+            <div class="mb-3">
                 <label for="mod_anio" class="form-label">Año</label>
                 <input type="number" class="form-control" id="mod_anio" name="anio" v-model="loteAModificar.anio" required>
+            </div>
+            <div class="mb-3">
+                <label for="mod_base" class="form-label">Base</label>
+                <input type="number" class="form-control" id="mod_base" name="base" v-model="loteAModificar.base" required>
             </div>
         </div>
         <div class="modal-footer">
@@ -263,9 +272,7 @@
                 // 1. Obtener datos del form
                 const form = document.getElementById('formAgregarLote');
                 const formData = new FormData(form);
-                
-                // NOTA: Aquí deberías hacer tu fetch POST real al backend
-                // Ejemplo: await fetch('/Lote/Crear', { method: 'POST', body: formData });
+            
                 
                 console.log("Creando lote:", Object.fromEntries(formData));
                 try {
@@ -273,7 +280,6 @@
                     const response = await fetch('/api/lotes', {
                         method: 'POST',
                         body: formData
-                        // No necesitas 'Content-Type', FormData lo maneja solo
                     });
 
                     const data = await response.json();
@@ -330,14 +336,25 @@
             },
 
             async eliminarLoteConfirmado() {
-                if(!this.loteAEliminar) return;
+                if (!this.loteAEliminar) return;
 
-                console.log("Eliminando lote ID:", this.loteAEliminar.id_lote);
-                // await fetch(`/Lote/Eliminar/${this.loteAEliminar.id_lote}`, { method: 'POST' });
+                try {
+                    const response = await fetch(`/api/lotes/${this.loteAEliminar.id_lote}`, {
+                        method: 'DELETE'
+                    });
 
-                this.modalEliminarBS.hide();
-                this.mostrarToast("Lote eliminado");
-                this.cargarLotes();
+                    if (!response.ok) throw new Error('No se pudo eliminar el usuario.');
+                    
+                    const data = await response.json();
+                    
+                    this.modalEliminarBS.hide();
+                    this.mostrarToast("Lote eliminado");
+                    this.cargarLotes();
+                    this.cambiarPagina(1);
+                } catch (error) {
+                    console.error('Error al eliminar:', error);
+                }
+            
             }
         }
     };

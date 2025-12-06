@@ -310,19 +310,36 @@
             },
 
             async modificarLote() {
-                // Aquí envías this.loteAModificar a tu backend
-                console.log("Modificando lote:", this.loteAModificar);
+                const form = document.getElementById('formModificarLote');
+                const formData = new FormData(form);
+            
+                //console.log("Modificando lote:", this.loteAModificar);
 
-                // Ejemplo Fetch:
-                // await fetch('/Lote/Editar', { 
-                //    method: 'POST', 
-                //    headers: {'Content-Type': 'application/json'},
-                //    body: JSON.stringify(this.loteAModificar) 
-                // });
+                 try {
+                    // 2. Enviar la petición a la API
+                    const response = await fetch(`/api/lotes/${this.loteAModificar.id_lote}`, {
+                        method: 'PUT', 
+                        body: formData
+                      
+                    });
 
-                this.modalModificarBS.hide();
-                this.mostrarToast("Lote modificado exitosamente");
-                this.cargarLotes();
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.mensaje || 'Error al modificar el lote.');
+                    }
+
+                    
+                    this.modalModificarBS.hide();
+                    form.reset();
+                    this.mostrarToast("Lote modificado exitosamente");
+                    this.cargarLotes();
+                    
+                } catch (error) {
+                    console.error('Error al modificar usuario:', error);
+                    this.modalModificarBS.hide();
+                    this.mostrarToast(error.message); 
+                }
             },
 
             // --- Lógica del Modal ELIMINAR ---

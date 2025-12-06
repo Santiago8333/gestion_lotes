@@ -108,4 +108,46 @@ public async Task<IActionResult> EliminarLote(int id)
         return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el lote."+ex });
     }
 }
+[HttpPut]
+[Route("/api/lotes/{id_lote:int}")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Modificar(int id_lote,[Bind("id_lote,n_lote,marca,modelo,dominio,anio,base")] Lotes lote)
+{
+    ModelState.Remove("creado_por");
+    ModelState.Remove("fecha_creacion");
+    if (id_lote != lote.id_lote)
+    {
+        return BadRequest(new { mensaje = "Inconsistencia en el ID del lote." });
+    }
+
+
+    if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+
+    var loteEnDb = await repo.ObtenerPorNloteAsync(lote.n_lote);
+    if (loteEnDb == null)
+    {
+        return NotFound(new { mensaje = "El lote que intentas modificar no existe." });
+    }
+    try
+    {
+
+        var loteModificado = await repo.Modificar(lote);
+
+        if (loteModificado == null)
+        {
+            return NotFound(new { mensaje = "Lote no encontrado." });
+        }
+
+        return Ok(new { mensaje = "¡Lote modificado exitosamente!" });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

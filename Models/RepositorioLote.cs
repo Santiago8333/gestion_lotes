@@ -14,6 +14,7 @@ namespace gestion_lotes.Models
         Task<Lotes?> ObtenerPorNloteAsync(int n_lote);
         Task<Lotes> Agregar(Lotes lote);
         Task<int> EliminarDirecto(int id);
+        Task<Lotes?> Modificar(Lotes lote);
     }
 
     public class RepositorioLote : ILoteRepositorio
@@ -53,5 +54,26 @@ namespace gestion_lotes.Models
                 .Where(u => u.id_lote == id)
                 .ExecuteDeleteAsync();
         }
+    public async Task<Lotes?> Modificar(Lotes lote)
+    {
+
+        var loteEnDb = await _context.Lotes.FindAsync(lote.id_lote);
+
+        if (loteEnDb == null)
+        {
+            return null;
+        }
+
+        loteEnDb.n_lote = lote.n_lote; 
+        loteEnDb.marca = lote.marca; 
+        loteEnDb.modelo = lote.modelo; 
+        loteEnDb.dominio = lote.dominio;
+        loteEnDb.anio = lote.anio;
+        loteEnDb.@base = lote.@base;
+        
+        await _context.SaveChangesAsync();
+
+        return loteEnDb;
+    }
     }
 }

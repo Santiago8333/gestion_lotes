@@ -33,7 +33,7 @@ public IActionResult Index()
 [Route("api/lotes")]
 public async Task<IActionResult> ObtenerLotes(int pagina = 1)
 {
-    int registrosPorPagina = 10;
+    int registrosPorPagina = 5;
 
     var consultaLotes = repo.ObtenerTodos().OrderBy(u => u.n_lote);
     var totalDeRegistros = await consultaLotes.CountAsync();
@@ -75,6 +75,7 @@ public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,anio
     try
     {
         lote.fecha_creacion = DateTime.Now;
+        lote.estado = true;
         lote.creado_por = User.Identity?.Name ?? "Sistema"; 
         await repo.Agregar(lote);
 

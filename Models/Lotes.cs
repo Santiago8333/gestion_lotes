@@ -7,7 +7,7 @@ public class Lotes
   
     [Key]
     public int id_lote { get; set; }
-    [Required]
+    [Required(ErrorMessage = "El numero de lote es obligatorio.")]
     public int n_lote { get; set; }
 
     [Required(ErrorMessage = "El marca es obligatorio.")]
@@ -23,7 +23,7 @@ public class Lotes
     [Required(ErrorMessage = "El anio es obligatorio.")]
     [StringLength(50)]
     public string anio { get; set; } = "";
-    [Required]
+    [Required(ErrorMessage = "El base es obligatorio.")]
     public decimal @base { get; set; }
     [Required(ErrorMessage = "El creado_por es obligatorio.")]
     [StringLength(50)]

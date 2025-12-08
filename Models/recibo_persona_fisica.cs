@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Net.Http.Headers;
 
-public class recibo_persona_fisica
+public class Recibo_persona_fisica
 {
     [Key]
     public int id_recibo_persona_fisica { get; set; }

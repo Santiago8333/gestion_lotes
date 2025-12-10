@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Recibo Persona Fisica";
+}
+<div id="app" class="container mt-5" style="padding-top: 10px;">
+    <div class="row">
+        <div class="col-md-12 history bg-light border-right">
+            <h1>Recibo Persona Fisica</h1>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellido</th>
+                            <th scope="col">Tipo Dni</th>
+                            <th scope="col">Dni</th>
+                            <th scope="col">Telefono</th>
+                            <th scope="col">Codigo Postal</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Domicilio</th>
+                            <th scope="col">Provincia</th>
+                            <th scope="col">Fecha de Creación</th>
+                            <th scope="col">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(recibo, index) in recibos" :key="recibo.id_recibo_persona_fisica">
+                            <td>{{ recibo.index }}</td>
+                            <td>{{ recibo.nombre }}</td>
+                            <td>{{ recibo.apellido }}</td>
+                            <td>{{ recibo.tipo_dni }}</td>
+                            <td>{{ recibo.dni }}</td>
+                            <td>{{ recibo.telefono }}</td>
+                            <td>{{ recibo.codigo_postal }}</td>
+                            <td>{{ recibo.email }}</td>
+                            <td>{{ recibo.domicilio }}</td>
+                            <td>{{ recibo.provincia }}</td>
+                            <td>{{ formatearFecha(recibo.fecha_creacion) }}</td>
+                            <td>
+                                <div class="dropdown position-static">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(recibo)">
+                                                <i class="fa-solid fa-pencil"></i> Modificar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalEliminar(recibo)">
+                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-if="recibos.length === 0">
+                            <td colspan="11" class="text-center text-muted">No hay recibos cargados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+             <button type="button" class="btn btn-primary agregar" data-bs-toggle="modal" data-bs-target="#agregarModal"><i class="fa-solid fa-plus"></i></button>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation" v-if="totalPaginas > 1">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" :class="{ disabled: paginaActual === 1 }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(paginaActual - 1)">Anterior</a>
+            </li>
+            <li class="page-item" v-for="pagina in totalPaginas" :key="pagina" :class="{ active: pagina === paginaActual }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(pagina)">{{ pagina }}</a>
+            </li>
+            <li class="page-item" :class="{ disabled: paginaActual === totalPaginas }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(paginaActual + 1)">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Sistema</strong>
+      <small class="text-muted">justo ahora</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+    <div class="toast-body">
+      @TempData["Mensaje"]
+    </div>
+  </div>
+@section Scripts {
+<script>
+    const appConfig = {
+        data() {
+            return {
+                recibos: [],
+                paginaActual: 1,
+                totalPaginas: 0,
+                
+                // Variables para manejar los modales
+                reciboAEliminar: null,
+                reciboAModificar: null, // Aquí guardaremos el lote que se está editando
+                
+                // Referencias a las instancias de Bootstrap Modal
+                modalEliminarBS: null,
+                modalAgregarBS: null,
+                modalModificarBS: null,
+                
+                toastBS: null
+            };
+        },
+        mounted() {
+            this.cargarRecibo();
+            
+            // Inicializar Toast
+            const toastEl = document.getElementById('successToast');
+            if (toastEl) this.toastBS = new bootstrap.Toast(toastEl);
+            
+            // Inicializar Modales de Bootstrap para poder abrirlos/cerrarlos desde JS
+            //this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
+            //this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
+            //this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+        },
+        methods: {
+            // --- Carga de datos ---
+            async cargarRecibo() {
+                try {
+                    const response = await fetch(`/api/recibof?pagina=${this.paginaActual}`);
+                    if (!response.ok) throw new Error('Error al cargar');
+                    const data = await response.json();
+                    
+                    this.recibos = data.recibos; 
+                    this.totalPaginas = data.totalPaginas;
+                    this.paginaActual = data.paginaActual;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            },
+
+            // --- Paginación ---
+            cambiarPagina(nuevaPagina) {
+                if (nuevaPagina >= 1 && nuevaPagina <= this.totalPaginas) {
+                    this.paginaActual = nuevaPagina;
+                    this.cargarRecibo();
+                }
+            },
+
+            // --- Utilidades ---
+            formatearFecha(fechaISO) {
+                if (!fechaISO) return '';
+                return new Date(fechaISO).toLocaleDateString('es-ES');
+            },
+            mostrarToast(mensaje) {
+                const toastBody = document.querySelector('#successToast .toast-body');
+                if(toastBody) toastBody.textContent = mensaje;
+                if(this.toastBS) this.toastBS.show();
+            }
+        }
+    };
+
+    const app = Vue.createApp(appConfig);
+    window.appInstance = app.mount('#app');
+</script>
+}

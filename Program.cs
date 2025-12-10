@@ -17,6 +17,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 builder.Services.AddScoped<IUsuarioRepositorio, RepositorioUsuario>();
 builder.Services.AddScoped<ILoteRepositorio, RepositorioLote>();
+builder.Services.AddScoped<IRecibo_persona_fisicaRepositorio, RepositorioRecibo_persona_fisica>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>//el sitio web valida con cookie
 	{

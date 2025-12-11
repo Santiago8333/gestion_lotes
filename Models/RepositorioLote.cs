@@ -72,5 +72,6 @@ namespace gestion_lotes.Models
 
         return loteEnDb;
     }
+    
     }
 }

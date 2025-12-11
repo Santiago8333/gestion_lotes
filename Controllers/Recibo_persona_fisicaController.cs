@@ -52,4 +52,42 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1)
 
     return Ok(resultado);
 }
+[HttpPost]
+[Route("/api/recibos")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Agregar([Bind("nombre,apellido,tipo_dni,dni,telefono,codigo_postal,email,domicilio,provincia")] Recibo_persona_fisica recibo)
+{
+    // Verifica si los datos recibidos del formulario son válidos
+    ModelState.Remove("creado_por");
+    ModelState.Remove("estado");
+    if (!ModelState.IsValid)
+    {
+        // Devolvemos un error 400 (Bad Request) con los mensajes
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+    /*
+    var LoteExistente = await repo.ObtenerPorNloteAsync(lote.n_lote);
+
+    if (LoteExistente != null)
+    {
+        return BadRequest(new { mensaje = "El numero de recibo ingresado ya está registrado." });
+    }
+    */
+    try
+    {
+        recibo.fecha_creacion = DateTime.Now;
+        recibo.estado = true;
+        recibo.creado_por = User.Identity?.Name ?? "Sistema"; 
+        await repo.Agregar(recibo);
+
+        return Ok(new { mensaje = "¡Recibo agregado exitosamente!" });
+    }
+    catch (Exception ex)
+    {
+        // 7. Devolver respuesta JSON de ERROR
+        return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

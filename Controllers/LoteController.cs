@@ -52,6 +52,19 @@ public async Task<IActionResult> ObtenerLotes(int pagina = 1)
 
     return Ok(resultado);
 }
+[HttpGet]
+[Route("api/buscar/lotes/{n_lote:int}")]
+public async Task<IActionResult> ObtenerLotesBuscar(int n_lote)
+{
+    var consultaLotes = await repo.ObtenerPorNloteAsync(n_lote);
+
+    if (consultaLotes == null)
+    {
+        return NotFound($"El lote número {n_lote} no existe.");
+    }
+
+    return Ok(consultaLotes);
+}
 [HttpPost]
 [Route("/api/lotes")]
 [ValidateAntiForgeryToken]

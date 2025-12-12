@@ -9,6 +9,7 @@ public class Recibo_persona_fisica
 {
     [Key]
     public int id_recibo_persona_fisica { get; set; }
+    public int id_lote { get; set; }
     [Required(ErrorMessage = "El nombre de lote es obligatorio.")]
     public string nombre {get;set;} = "";
     [Required(ErrorMessage = "El apellido de lote es obligatorio.")]

@@ -90,6 +90,59 @@
       
       <form v-on:submit.prevent="crearRecibo" id="formAgregarRecibo" novalidate>
       @Html.AntiForgeryToken()
+    <div class="card mb-3 bg-light">
+    <div class="card-body">
+        <label class="form-label fw-bold">Buscar Lote</label>
+        
+        <div class="input-group mb-2">
+            <input type="number" 
+                   class="form-control" 
+                   v-model="busquedaLote" 
+                   placeholder="Ingrese N° de Lote"
+                   v-on:keypress.enter.prevent="buscarLote"> 
+            
+            <button class="btn btn-primary" 
+                    type="button" 
+                    v-on:click="buscarLote" 
+                    :disabled="cargando">
+                <span v-if="cargando" class="spinner-border spinner-border-sm"></span>
+                <span v-else>Buscar</span>
+            </button>
+        </div>
+
+        <div v-if="errorBusqueda" class="text-danger small mb-2">
+            {{ errorBusqueda }}
+        </div>
+
+        <div v-if="loteSeleccionado">
+            
+            <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                <div>
+                    <strong>Lote N°: {{ loteSeleccionado.n_lote }}</strong><br>
+                    <small>Marca: {{ loteSeleccionado.marca }} | Base: ${{ loteSeleccionado.base }}</small>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="limpiarLote">X</button>
+            </div>
+
+            <div class="mb-2">
+                <label for="precio_subastado" class="form-label fw-bold text-primary">Precio Final Subastado</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" 
+                           class="form-control fw-bold" 
+                           id="precio_subastado" 
+                           name="precio_subastado" 
+                           v-model="precioSubastado"
+                           step="0.01"
+                           required> 
+                </div>
+            </div>
+
+            <input type="hidden" name="id_lote" :value="loteSeleccionado.id_lote">
+        </div>
+        
+    </div>
+</div>
         <div class="modal-body">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
@@ -155,7 +208,11 @@
                 recibos: [],
                 paginaActual: 1,
                 totalPaginas: 0,
-                
+                busquedaLote: '',      // Lo que escribe el usuario
+                loteSeleccionado: null,
+                errorBusqueda: null,
+                cargando: false,
+                precioSubastado: 0,
                 // Variables para manejar los modales
                 reciboAEliminar: null,
                 reciboAModificar: null, // Aquí guardaremos el lote que se está editando
@@ -176,12 +233,59 @@
             if (toastEl) this.toastBS = new bootstrap.Toast(toastEl);
             
             // Inicializar Modales de Bootstrap para poder abrirlos/cerrarlos desde JS
-            //this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
+            this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
             //this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
             //this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
         },
         methods: {
             // --- Carga de datos ---
+            async buscarLote() {
+            // 1. Validaciones básicas
+            if (!this.busquedaLote) return;
+            
+            this.cargando = true;
+            this.errorBusqueda = null;
+            this.loteSeleccionado = null;
+
+            try {
+                // 2. Llamada a TU API (La que arreglamos antes)
+                // Asegúrate que la ruta sea correcta
+                const response = await fetch(`/api/buscar/lotes/${this.busquedaLote}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.loteSeleccionado = data; // Guardamos el lote encontrado
+                    console.log(data);
+                } else {
+                    if (response.status === 404) {
+                        this.errorBusqueda = "No se encontró un lote con ese número.";
+                    } else {
+                        this.errorBusqueda = "Error al buscar el lote.";
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                this.errorBusqueda = "Error de conexión con el servidor.";
+            } finally {
+                this.cargando = false;
+            }
+        },
+
+        limpiarLote() {
+            this.loteSeleccionado = null;
+            this.busquedaLote = '';
+            this.errorBusqueda = null;
+        },
+        crearRecibo() {
+            // Aquí va tu lógica actual de guardar.
+            // IMPORTANTE: Asegúrate de validar que se haya seleccionado un lote
+            if (!this.loteSeleccionado) {
+                alert("Por favor, busca y selecciona un lote antes de guardar.");
+                return;
+            }
+
+            // ... el resto de tu código de envío ...
+        },
             async cargarRecibo() {
                 try {
                     const response = await fetch(`/api/recibof?pagina=${this.paginaActual}`);

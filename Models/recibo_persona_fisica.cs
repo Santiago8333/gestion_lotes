@@ -31,6 +31,11 @@ public class Recibo_persona_fisica
     public DateTime fecha_creacion { get; set; }
     [Required(ErrorMessage = "El provincia de lote es obligatorio.")]
     public string provincia {get;set;} = "";
+    [Required(ErrorMessage = "El % de pago de lote es obligatorio.")]
+    [Range(0, 100, ErrorMessage = "El porcentaje debe estar entre 0 y 100")]
+    public decimal pago_lote { get; set; }
+    [Required(ErrorMessage = "El precio subastado de lote es obligatorio.")]
+    public decimal precio_subastado { get; set; }
     public bool estado { get; set; }
 
 

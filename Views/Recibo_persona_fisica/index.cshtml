@@ -19,6 +19,7 @@
                             <th scope="col">Email</th>
                             <th scope="col">Domicilio</th>
                             <th scope="col">Provincia</th>
+                            <th scope="col">Precio Subastado</th>
                             <th scope="col">Fecha de Creación</th>
                             <th scope="col">Acción</th>
                         </tr>
@@ -35,6 +36,7 @@
                             <td>{{ recibo.email }}</td>
                             <td>{{ recibo.domicilio }}</td>
                             <td>{{ recibo.provincia }}</td>
+                            <td>{{ recibo.precio_subastado }}</td>
                             <td>{{ formatearFecha(recibo.fecha_creacion) }}</td>
                             <td>
                                 <div class="dropdown position-static">
@@ -154,7 +156,7 @@
             </div>
             <div class="mb-3">
                 <label for="tipo_dni" class="form-label">Tipo Dni</label>
-                <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" required>
+                <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" required>
             </div>
             <div class="mb-3">
                 <label for="dni" class="form-label">Dni</label>
@@ -162,7 +164,7 @@
             </div>
             <div class="mb-3">
                 <label for="telefono" class="form-label">Telefono</label>
-                <input type="text" class="form-control" id="telefono" name="telefono" required>
+                <input type="tel" class="form-control" id="telefono" name="telefono" required>
             </div>
             <div class="mb-3">
                 <label for="codigo_postal" class="form-label">Codigo Postal</label>
@@ -186,6 +188,24 @@
             <button type="submit" class="btn btn-primary">Guardar Recibo</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+    <!-- Modal eliminar-->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas eliminar este Recibo?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+      </div>
     </div>
   </div>
 </div>
@@ -276,18 +296,43 @@
             this.busquedaLote = '';
             this.errorBusqueda = null;
         },
-        crearRecibo() {
-            // Aquí va tu lógica actual de guardar.
-            // IMPORTANTE: Asegúrate de validar que se haya seleccionado un lote
+       async crearRecibo() {
             if (!this.loteSeleccionado) {
                 alert("Por favor, busca y selecciona un lote antes de guardar.");
                 return;
             }
+            const form = document.getElementById('formAgregarRecibo');
+            const formData = new FormData(form);
+             console.log("Creando Recibo:", Object.fromEntries(formData));
+            try {
+                
+                const response = await fetch('/api/recibos', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            // ... el resto de tu código de envío ...
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Si la API devuelve un error (ej. 400, 500)
+                    throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                }
+
+                // ¡Éxito!
+                this.modalAgregarBS.hide();
+                form.reset();
+                this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
+                this.cargarRecibo();
+
+            } catch (error) {
+                console.error('Error al crear lote:', error);
+                this.modalAgregarBS.hide();
+                this.mostrarToast(error.message);
+            }
         },
             async cargarRecibo() {
                 try {
+                    
                     const response = await fetch(`/api/recibof?pagina=${this.paginaActual}`);
                     if (!response.ok) throw new Error('Error al cargar');
                     const data = await response.json();

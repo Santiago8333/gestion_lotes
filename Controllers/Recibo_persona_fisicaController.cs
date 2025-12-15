@@ -52,9 +52,10 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1)
 
     return Ok(resultado);
 }
+/*
 [HttpPost]
 [Route("/api/recibos")]
-[ValidateAntiForgeryToken]
+//[ValidateAntiForgeryToken]
 public async Task<IActionResult> Agregar([Bind("id_lote,nombre,apellido,tipo_dni,dni,telefono,codigo_postal,email,domicilio,provincia,pago_lote,precio_subastado")] Recibo_persona_fisica recibo)
 {
     // Verifica si los datos recibidos del formulario son válidos
@@ -67,14 +68,14 @@ public async Task<IActionResult> Agregar([Bind("id_lote,nombre,apellido,tipo_dni
                                         .Select(e => e.ErrorMessage);
         return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
     }
-    /*
+    
     var LoteExistente = await repo.ObtenerPorNloteAsync(lote.n_lote);
 
     if (LoteExistente != null)
     {
         return BadRequest(new { mensaje = "El numero de recibo ingresado ya está registrado." });
     }
-    */
+    
     try
     {
         recibo.fecha_creacion = DateTime.Now;
@@ -88,6 +89,57 @@ public async Task<IActionResult> Agregar([Bind("id_lote,nombre,apellido,tipo_dni
     {
         // 7. Devolver respuesta JSON de ERROR
         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
+*/
+[HttpPost]
+[Route("/api/recibos")]
+// [ValidateAntiForgeryToken]  <-- QUITALO O COMÉNTALO para que funcione el JSON
+public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(new { mensaje = "Datos inválidos en la estructura JSON." });
+    }
+
+    try
+    {
+        // 1. Crear tu entidad de Base de Datos y llenarla con los datos del DTO
+        var nuevoRecibo = new Recibo_persona_fisica
+        {
+            id_lote = datos.Id_lote,
+            nombre = datos.Nombre,
+            apellido = datos.Apellido,
+            dni = datos.Dni,
+            tipo_dni = datos.Tipo_dni,
+            telefono = datos.Telefono,
+            email = datos.Email,
+            domicilio = datos.Domicilio,
+            codigo_postal = datos.Codigo_postal,
+            provincia = datos.Provincia,
+            precio_subastado = datos.Precio_subastado,
+            
+            // Campos automáticos
+            fecha_creacion = DateTime.Now,
+            estado = true,
+            creado_por = User.Identity?.Name ?? "Sistema"
+        };
+
+        // 2. PROCESAR LOS PAGOS 
+        // Aquí tienes acceso a datos.Pagos.Gobierno.Efectivo, etc.
+        // Tienes que decidir dónde guardar estos pagos. 
+        // Ejemplo (pseudo-código):
+        // var pagoGobierno = new Pago { Monto = datos.Pagos.Gobierno.Efectivo, Tipo = "Efectivo", Entidad = "Gobierno" };
+        // db.Pagos.Add(pagoGobierno);
+
+        // 3. Guardar el recibo principal
+        // await repo.Agregar(nuevoRecibo);
+
+        return Ok(new { mensaje = "¡Recibo procesado exitosamente!" });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = $"Error interno: {ex.Message}" });
     }
 }
 [HttpDelete]

@@ -80,7 +80,7 @@ public async Task<IActionResult> Agregar([Bind("id_lote,nombre,apellido,tipo_dni
         recibo.fecha_creacion = DateTime.Now;
         recibo.estado = true;
         recibo.creado_por = User.Identity?.Name ?? "Sistema"; 
-        await repo.Agregar(recibo);
+        //await repo.Agregar(recibo);
 
         return Ok(new { mensaje = "¡Recibo agregado exitosamente!" });
     }

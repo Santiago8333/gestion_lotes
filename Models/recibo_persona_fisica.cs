@@ -37,39 +37,20 @@ public class Recibo_persona_fisica
     [Required(ErrorMessage = "El precio subastado de lote es obligatorio.")]
     public decimal precio_subastado { get; set; }
     public bool estado { get; set; }
-
+    
 }
 public class CrearReciboRequest
 {
-    // Datos del recibo
-    public int Id_lote { get; set; }
-    public string Nombre { get; set; } = "";
-    public string Apellido { get; set; } = "";
-    public string Tipo_dni { get; set; } = "";
-    public string Dni { get; set; } = "";
-    public string Telefono { get; set; } = "";
-    public string Email { get; set; } = "";
-    public string Domicilio { get; set; } = "";
-    public string Codigo_postal { get; set; } = "";
-    public string Provincia { get; set; } = "";
-    public decimal Precio_subastado { get; set; }
-    
-    // Aquí recibimos el objeto complejo de pagos
-    public PagosGlobales? Pagos { get; set; }
-}
-public class PagosGlobales
-{
-    public DetallePago? Gobierno { get; set; }
-    public DetallePago? Cmcpsl { get; set; }
-    public DetallePago? Dpip { get; set; }
-}
-
-public class DetallePago
-{
-    public decimal Efectivo { get; set; }
-    public decimal Transferencia { get; set; }
-    public decimal Dolar_monto { get; set; }
-    public decimal Dolar_cotizacion { get; set; }
-    public decimal Euro_monto { get; set; }
-    public decimal Euro_cotizacion { get; set; }
+    public int id_lote { get; set; }
+    public string nombre { get; set; } = "";
+    public string apellido { get; set; } = "";
+    public string tipo_dni { get; set; } = "";
+    public string dni { get; set; } = "";
+    public string telefono { get; set; } = "";
+    public string email { get; set; } = "";
+    public string domicilio { get; set; } = "";
+    public string codigo_postal { get; set; } = "";
+    public string provincia { get; set; } = "";
+    public decimal precio_subastado { get; set; }
+    public List<Pagos> lista_pagos { get; set; } = new List<Pagos>();
 }

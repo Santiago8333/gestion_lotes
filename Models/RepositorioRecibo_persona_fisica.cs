@@ -11,6 +11,7 @@ namespace gestion_lotes.Models
         Task<Recibo_persona_fisica?> ObtenerPorId(int id);
         Task<Recibo_persona_fisica> Agregar(Recibo_persona_fisica recibo);
         Task<int> EliminarDirecto(int id);
+        Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
 
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
@@ -34,6 +35,76 @@ namespace gestion_lotes.Models
             _context.Recibo_persona_fisica.Add(recibo);
             await _context.SaveChangesAsync();
             return recibo;
+        }
+      public async Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request, string usuarioCreador)
+        {
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                
+                var nuevoRecibo = new Recibo_persona_fisica
+                {
+                    id_lote = request.id_lote,
+                    nombre = request.nombre,
+                    apellido = request.apellido,
+                    dni = request.dni,
+                    tipo_dni = request.tipo_dni,
+                    telefono = request.telefono,
+                    email = request.email,
+                    domicilio = request.domicilio,
+                    codigo_postal = request.codigo_postal,
+                    provincia = request.provincia,
+                    precio_subastado = request.precio_subastado,
+                    
+                    // Campos automáticos
+                    fecha_creacion = DateTime.Now,
+                    estado = true,
+                    creado_por = usuarioCreador
+                };
+
+                _context.Recibo_persona_fisica.Add(nuevoRecibo);
+                
+                // GUARDAMOS CAMBIOS: Esto genera el ID del recibo en la BD
+                await _context.SaveChangesAsync(); 
+
+                // 2. Procesar la lista de pagos (Detalle)
+                if (request.lista_pagos != null && request.lista_pagos.Count > 0)
+                {
+                    var pagosEntidad = new List<Pagos>();
+
+                    foreach (var item in request.lista_pagos)
+                    {
+                        var nuevoPago = new Pagos
+                        {
+                            id_recibo_persona_fisica = nuevoRecibo.id_recibo_persona_fisica, 
+                            destinatario = item.destinatario,
+                            efectivo = item.efectivo,
+                            transferencia = item.transferencia,
+                            dolar_monto = item.dolar_monto,
+                            dolar_cotizacion = item.dolar_cotizacion,
+                            euro_monto = item.euro_monto,
+                            euro_cotizacion = item.euro_cotizacion
+                        };
+                        pagosEntidad.Add(nuevoPago);
+                    }
+
+                    // Agregamos todos los pagos de una sola vez
+                    _context.Pagos.AddRange(pagosEntidad);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 3. Confirmar transacción
+                await transaction.CommitAsync();
+                return nuevoRecibo;
+            }
+            catch (Exception)
+            {
+                // Si hay error, deshacemos todo (ni recibo ni pagos se guardan)
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
         public async Task<int> EliminarDirecto(int id)
         {

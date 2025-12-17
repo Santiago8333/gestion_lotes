@@ -19,6 +19,7 @@ namespace gestion_lotes.Models
         public DbSet<Usuarios> Usuarios { get; set; }
         public DbSet<Lotes> Lotes { get; set; }
         public DbSet<Recibo_persona_fisica> Recibo_persona_fisica { get; set; }
+        public DbSet<Pagos> Pagos { get; set; }
         // Opcional: Puedes agregar configuraciones adicionales aquí si es necesario
         // protected override void OnModelCreating(ModelBuilder modelBuilder)
         // {

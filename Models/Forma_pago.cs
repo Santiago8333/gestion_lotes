@@ -1,15 +1,13 @@
 namespace gestion_lotes.Models;
-using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Net.Http.Headers;
-
-public class Pagos
+using System.ComponentModel.DataAnnotations.Schema;
+public class Forma_Pagos
 {
     [Key]
-    public int id_recibo_persona_fisica {get;set;}
-    public string destinatario { get; set; } = ""; // "Gobierno", "Cmcpsl", etc.
+    public int id_forma_pago { get; set; }
+    [ForeignKey("Recibo")]
+    public int id_recibo_persona_fisica { get; set; }
+    public string destinatario { get; set; } = "";
     public decimal efectivo { get; set; }
     public decimal transferencia { get; set; }
     public decimal dolar_monto { get; set; }

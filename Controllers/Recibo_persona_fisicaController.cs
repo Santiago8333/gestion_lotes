@@ -58,18 +58,25 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1)
 [Route("/api/recibos")]
 public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
 {
-    if (!ModelState.IsValid) return BadRequest(ModelState);
+    ModelState.Remove("creado_por");
+    ModelState.Remove("fecha_creacion");
+     if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
 
     try
     {
         string usuario = User.Identity?.Name ?? "Sistema";
-        var recibo = await repo.CrearReciboConPagos(datos,usuario);
+        //var recibo = await repo.CrearReciboConPagos(datos,usuario);
         
-        return Ok(new { mensaje = "Éxito", id = recibo.id_recibo_persona_fisica });
+        return Ok(new { mensaje = "Éxito"});
     }
     catch (Exception ex)
     {
-        return StatusCode(500, ex.Message);
+         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
 [HttpDelete]

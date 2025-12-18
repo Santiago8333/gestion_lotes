@@ -52,5 +52,6 @@ public class CrearReciboRequest
     public string codigo_postal { get; set; } = "";
     public string provincia { get; set; } = "";
     public decimal precio_subastado { get; set; }
-    public List<Pagos> lista_pagos { get; set; } = new List<Pagos>();
+    public decimal pago_lote { get; set; }
+    public List<Forma_Pagos> lista_pagos { get; set; } = new List<Forma_Pagos>();
 }

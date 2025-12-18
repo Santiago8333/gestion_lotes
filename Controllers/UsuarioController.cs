@@ -111,7 +111,6 @@ public async Task<ActionResult> Logout()
         }
         catch (Exception ex)
         {
-
             return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el usuario." });
         }
     }

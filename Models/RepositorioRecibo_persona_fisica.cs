@@ -57,6 +57,7 @@ namespace gestion_lotes.Models
                     codigo_postal = request.codigo_postal,
                     provincia = request.provincia,
                     precio_subastado = request.precio_subastado,
+                    pago_lote = request.pago_lote,
                     
                     // Campos automáticos
                     fecha_creacion = DateTime.Now,
@@ -72,11 +73,11 @@ namespace gestion_lotes.Models
                 // 2. Procesar la lista de pagos (Detalle)
                 if (request.lista_pagos != null && request.lista_pagos.Count > 0)
                 {
-                    var pagosEntidad = new List<Pagos>();
+                    var pagosEntidad = new List<Forma_Pagos>();
 
                     foreach (var item in request.lista_pagos)
                     {
-                        var nuevoPago = new Pagos
+                        var nuevoPago = new Forma_Pagos
                         {
                             id_recibo_persona_fisica = nuevoRecibo.id_recibo_persona_fisica, 
                             destinatario = item.destinatario,
@@ -91,7 +92,7 @@ namespace gestion_lotes.Models
                     }
 
                     // Agregamos todos los pagos de una sola vez
-                    _context.Pagos.AddRange(pagosEntidad);
+                    _context.Forma_Pagos.AddRange(pagosEntidad);
                     await _context.SaveChangesAsync();
                 }
 
@@ -99,9 +100,15 @@ namespace gestion_lotes.Models
                 await transaction.CommitAsync();
                 return nuevoRecibo;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Si hay error, deshacemos todo (ni recibo ni pagos se guardan)
+                System.Diagnostics.Debug.WriteLine("=================================");
+                System.Diagnostics.Debug.WriteLine("ERROR CRÍTICO: " + ex.ToString());
+                System.Diagnostics.Debug.WriteLine("=================================");
+                
+                // Si usas 'dotnet run' en consola, usa este:
+                Console.WriteLine("ERROR CRÍTICO: " + ex.ToString());
+
                 await transaction.RollbackAsync();
                 throw;
             }

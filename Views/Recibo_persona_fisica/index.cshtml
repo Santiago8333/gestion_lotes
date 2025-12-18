@@ -156,6 +156,8 @@
                 <div class="input-group input-group-sm">
                     <input type="number" 
                            class="form-control" 
+                           id="pago_lote"
+                           name="pago_lote"
                            v-model.number="porcentajeLote" 
                            min="0" max="100">
                     <span class="input-group-text">%</span>
@@ -721,6 +723,45 @@
             const form = document.getElementById('formAgregarRecibo');
             const formData = new FormData(form);
             const datosPersonales = Object.fromEntries(formData.entries());
+            const listaPagosArray = [];
+            const limpiarNumero = (val) => parseFloat(val) || 0;
+            if (this.pagos.gobierno) {
+                    listaPagosArray.push({
+                    destinatario: "Gobierno", // Agregamos el nombre manualmente
+                    efectivo: limpiarNumero(this.pagos.gobierno.efectivo),
+                    transferencia: limpiarNumero(this.pagos.gobierno.transferencia),
+                    dolar_monto: limpiarNumero(this.pagos.gobierno.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagos.gobierno.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagos.gobierno.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagos.gobierno.euro_cotizacion)
+                });
+            }
+
+            // B. Procesar CMCPSL
+            if (this.pagos.cmcpsl) {
+                listaPagosArray.push({
+                    destinatario: "Cmcpsl",
+                    efectivo: limpiarNumero(this.pagos.cmcpsl.efectivo),
+                    transferencia: limpiarNumero(this.pagos.cmcpsl.transferencia),
+                    dolar_monto: limpiarNumero(this.pagos.cmcpsl.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagos.cmcpsl.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagos.cmcpsl.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagos.cmcpsl.euro_cotizacion)
+                });
+            }
+
+            // C. Procesar DPIP
+            if (this.pagos.dpip) {
+                listaPagosArray.push({
+                    destinatario: "Dpip",
+                    efectivo: limpiarNumero(this.pagos.dpip.efectivo),
+                    transferencia: limpiarNumero(this.pagos.dpip.transferencia),
+                    dolar_monto: limpiarNumero(this.pagos.dpip.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagos.dpip.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagos.dpip.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagos.dpip.euro_cotizacion)
+                });
+            }
             const payload = {
         // Datos de la persona (spread operator para sacar lo del form)
         nombre: datosPersonales.nombre,
@@ -732,13 +773,13 @@
         domicilio: datosPersonales.domicilio,
         codigo_postal: datosPersonales.codigo_postal,
         provincia: datosPersonales.provincia,
+        pago_lote: datosPersonales.pago_lote,
 
         // Datos del recibo y lote
         id_lote: this.loteSeleccionado.id_lote,
         precio_subastado: parseFloat(this.precioSubastado),
         
-        // OBJETO COMPLEJO DE PAGOS (Aquí solía fallar el FormData)
-        lista_pagos: this.pagos 
+        lista_pagos: listaPagosArray
     };
 
     console.log("Enviando JSON:", payload);

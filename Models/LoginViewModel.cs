@@ -6,8 +6,8 @@ public class LoginViewModel
 {
     [Required(ErrorMessage = "El Email es obligatorio.")]
     [EmailAddress]
-    public string email { get; set; }
+    public string email { get; set; } = "";
 
     [Required(ErrorMessage = "La Clave es obligatoria.")]
-    public string clave { get; set; }
+    public string clave { get; set; } = "";
 }

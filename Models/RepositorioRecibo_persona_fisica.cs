@@ -12,7 +12,7 @@ namespace gestion_lotes.Models
         Task<Recibo_persona_fisica> Agregar(Recibo_persona_fisica recibo);
         Task<int> EliminarDirecto(int id);
         Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
-
+        Task<bool> ExisteReciboEnLote(int id);
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -29,6 +29,11 @@ namespace gestion_lotes.Models
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {
             return _context.Recibo_persona_fisica.Find(id);
+        }
+        public async Task<bool> ExisteReciboEnLote(int id)
+        {
+            return await _context.Recibo_persona_fisica
+                .AnyAsync(r => r.id_lote == id);
         }
         public async Task<Recibo_persona_fisica> Agregar(Recibo_persona_fisica recibo)
         {
@@ -115,9 +120,27 @@ namespace gestion_lotes.Models
         }
         public async Task<int> EliminarDirecto(int id)
         {
-            return await _context.Recibo_persona_fisica
-                .Where(u => u.id_recibo_persona_fisica == id)
-                .ExecuteDeleteAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
+            {
+                await _context.Forma_Pagos
+                    .Where(f => f.id_recibo_persona_fisica == id)
+                    .ExecuteDeleteAsync();
+
+                int filasAfectadas = await _context.Recibo_persona_fisica
+                    .Where(u => u.id_recibo_persona_fisica == id)
+                    .ExecuteDeleteAsync();
+
+                await transaction.CommitAsync();
+                
+                return filasAfectadas;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
         public async Task<Recibo_persona_fisica?> Modificar(Recibo_persona_fisica recibo)
         {
@@ -146,4 +169,5 @@ namespace gestion_lotes.Models
             return reciboEnDb;
         }
     }
+    
 }

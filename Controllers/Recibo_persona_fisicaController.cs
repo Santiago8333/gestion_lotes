@@ -69,10 +69,16 @@ public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
 
     try
     {
+        bool LoteExiste = await repo.ExisteReciboEnLote(datos.id_lote);
+
+        if (LoteExiste)
+        {
+            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
+        }
         string usuario = User.Identity?.Name ?? "Sistema";
-        //var recibo = await repo.CrearReciboConPagos(datos,usuario);
+        var recibo = await repo.CrearReciboConPagos(datos,usuario);
         
-        return Ok(new { mensaje = "Éxito"});
+        return Ok(new { mensaje = "Recibo agregado"});
     }
     catch (Exception ex)
     {
@@ -81,7 +87,7 @@ public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
 }
 [HttpDelete]
 [Route("api/recibos/{id}")]
-public async Task<IActionResult> EliminarLote(int id)
+public async Task<IActionResult> EliminarRecibo(int id)
 {
     try
     {

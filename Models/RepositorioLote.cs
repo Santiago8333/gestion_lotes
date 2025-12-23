@@ -14,6 +14,7 @@ namespace gestion_lotes.Models
         Task<Lotes> Agregar(Lotes lote);
         Task<int> EliminarDirecto(int id);
         Task<Lotes?> Modificar(Lotes lote);
+        Task<IEnumerable<Lotes>> BuscarLotesGeneralAsync(string terminoBusqueda);
     }
 
     public class RepositorioLote : ILoteRepositorio
@@ -71,6 +72,32 @@ namespace gestion_lotes.Models
         await _context.SaveChangesAsync();
 
         return loteEnDb;
+    }
+    public async Task<IEnumerable<Lotes>> BuscarLotesGeneralAsync(string terminoBusqueda)
+    {
+        
+        if (string.IsNullOrWhiteSpace(terminoBusqueda))
+        {
+            return new List<Lotes>();
+        }
+
+       
+        bool esNumero = int.TryParse(terminoBusqueda, out int numeroLote);
+
+        var query = _context.Lotes.AsQueryable();
+
+        if (esNumero)
+        {
+            query = query.Where(l => l.n_lote == numeroLote || l.marca.Contains(terminoBusqueda));
+        }
+        else
+        {
+            
+            query = query.Where(l => l.marca.Contains(terminoBusqueda));
+            
+        }
+
+        return await query.ToListAsync();
     }
     
     }

@@ -53,17 +53,17 @@ public async Task<IActionResult> ObtenerLotes(int pagina = 1)
     return Ok(resultado);
 }
 [HttpGet]
-[Route("api/buscar/lotes/{n_lote:int}")]
-public async Task<IActionResult> ObtenerLotesBuscar(int n_lote)
+[Route("api/buscar/lotes/{termino}")]
+public async Task<IActionResult> ObtenerLotesBuscar(string termino)
 {
-    var consultaLotes = await repo.ObtenerPorNloteAsync(n_lote);
+    var resultados = await repo.BuscarLotesGeneralAsync(termino);
 
-    if (consultaLotes == null)
+    if (resultados == null || !resultados.Any())
     {
-        return NotFound($"El lote número {n_lote} no existe.");
+        return NotFound($"No se encontraron lotes con el criterio: {termino}");
     }
 
-    return Ok(consultaLotes);
+    return Ok(resultados);
 }
 [HttpPost]
 [Route("/api/lotes")]

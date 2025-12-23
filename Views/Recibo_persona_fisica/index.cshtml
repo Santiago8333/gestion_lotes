@@ -98,7 +98,7 @@
             <label class="form-label fw-bold">Buscar Lote</label>
             
             <div class="input-group mb-2">
-                <input type="number" 
+                <input type="text" 
                        class="form-control" 
                        v-model="busquedaLote" 
                        placeholder="Ingrese N° de Lote"
@@ -111,12 +111,22 @@
                     <span v-if="cargando" class="spinner-border spinner-border-sm"></span>
                     <span v-else>Buscar</span>
                 </button>
+                
             </div>
 
             <div v-if="errorBusqueda" class="text-danger small mb-2">
                 {{ errorBusqueda }}
             </div>
-
+            <div v-if="resultadosBusqueda.length > 0" class="list-group mb-3 shadow-sm">
+                    <button type="button" 
+                            class="list-group-item list-group-item-action"
+                            v-for="lote in resultadosBusqueda" 
+                            :key="lote.id"
+                            v-on:click="seleccionarLote(lote)">
+                        <strong>Lote N° {{ lote.n_lote }}</strong> 
+                        <small class="text-muted">- ID: {{ lote.id }}</small>
+                    </button>
+                </div>
             <div v-if="loteSeleccionado">
                 <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
                     <div>
@@ -561,6 +571,7 @@
                 loteSeleccionado: null,
                 errorBusqueda: null,
                 cargando: false,
+                resultadosBusqueda: [],
                 precioSubastado: 0,
                 porcentajeLote: 30,
                 // Variables para manejar los modales
@@ -668,38 +679,58 @@
     }
     },
         methods: {
-            // --- Carga de datos ---
             async buscarLote() {
-            // 1. Validaciones básicas
-            if (!this.busquedaLote) return;
-            
-            this.cargando = true;
-            this.errorBusqueda = null;
-            this.loteSeleccionado = null;
+                    if (!this.busquedaLote) return;
+                    
+                    this.cargando = true;
+                    this.errorBusqueda = null;
+                    this.resultadosBusqueda = []; 
+                    this.loteSeleccionado = null; 
 
-            try {
-                // 2. Llamada a TU API (La que arreglamos antes)
-                // Asegúrate que la ruta sea correcta
-                const response = await fetch(`/api/buscar/lotes/${this.busquedaLote}`);
+                    try {
+                        
+                        const response = await fetch(`/api/buscar/lotes/${encodeURIComponent(this.busquedaLote)}`);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    this.loteSeleccionado = data; // Guardamos el lote encontrado
-                    console.log(data);
-                } else {
-                    if (response.status === 404) {
-                        this.errorBusqueda = "No se encontró un lote con ese número.";
-                    } else {
-                        this.errorBusqueda = "Error al buscar el lote.";
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            // Verificamos si data es un array o un objeto único
+                            if (Array.isArray(data)) {
+                                this.resultadosBusqueda = data;
+                                
+                                if (data.length === 0) {
+                                    this.errorBusqueda = "No se encontraron coincidencias.";
+                                }
+                            } else {
+                                // Si la API devolvió un solo objeto, lo convertimos en array
+                                this.resultadosBusqueda = [data];
+                            }
+
+                        } else {
+                            if (response.status === 404) {
+                                this.errorBusqueda = "No se encontró un lote con ese número.";
+                            } else {
+                                this.errorBusqueda = "Error al buscar el lote.";
+                            }
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        this.errorBusqueda = "Error de conexión con el servidor.";
+                    } finally {
+                        this.cargando = false;
                     }
-                }
-            } catch (error) {
-                console.error(error);
-                this.errorBusqueda = "Error de conexión con el servidor.";
-            } finally {
-                this.cargando = false;
-            }
-        },
+                },
+
+                
+                seleccionarLote(lote) {
+                    this.loteSeleccionado = lote;      
+                    this.busquedaLote = lote.numero;   
+                    this.resultadosBusqueda = [];      
+                    
+                    console.log("Lote seleccionado:", this.loteSeleccionado);
+                    
+                },
+            
 
         limpiarLote() {
             this.loteSeleccionado = null;

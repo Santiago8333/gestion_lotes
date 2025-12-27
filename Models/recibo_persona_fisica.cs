@@ -37,6 +37,7 @@ public class Recibo_persona_fisica
     [Required(ErrorMessage = "El precio subastado de lote es obligatorio.")]
     public decimal precio_subastado { get; set; }
     public bool estado { get; set; }
+    public virtual ICollection<Forma_Pagos>? FormasDePago { get; set; }
     
 }
 public class CrearReciboRequest

@@ -168,6 +168,12 @@ namespace gestion_lotes.Models
 
             return reciboEnDb;
         }
+        public async Task<Recibo_persona_fisica?> ObtenerPorIdyForma_pago(int id)
+        {
+            return await _context.Recibo_persona_fisica
+                .Include(r => r.FormasDePago)
+                .FirstOrDefaultAsync(r => r.id_recibo_persona_fisica == id);
+        }
     }
     
 }

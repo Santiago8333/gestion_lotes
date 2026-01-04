@@ -59,7 +59,7 @@
                             </td>
                         </tr>
                         <tr v-if="recibos.length === 0">
-                            <td colspan="11" class="text-center text-muted">No hay recibos cargados</td>
+                            <td colspan="13" class="text-center text-muted">No hay recibos cargados</td>
                         </tr>
                     </tbody>
                 </table>
@@ -124,14 +124,14 @@
                             :key="lote.id"
                             v-on:click="seleccionarLote(lote)">
                         <strong>Lote N° {{ lote.n_lote }}</strong> 
-                        <small class="text-muted">- ID: {{ lote.id }}</small>
+                        <small class="text-muted">- Precio Base: {{ lote.base }} | Marca: {{ lote.marca }}</small>
                     </button>
                 </div>
             <div v-if="loteSeleccionado">
                 <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
                     <div>
                         <strong>Lote N°: {{ loteSeleccionado.n_lote }}</strong><br>
-                        <small>Marca: {{ loteSeleccionado.marca }} | Base: ${{ loteSeleccionado.base }}</small>
+                        <small>Base: ${{ loteSeleccionado.base }} | Marca: {{ loteSeleccionado.marca }}</small>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="limpiarLote">X</button>
                 </div>

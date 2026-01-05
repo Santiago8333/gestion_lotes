@@ -548,6 +548,28 @@
     </div>
   </div>
 </div>
+<!-- Modal modificar-->
+<div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Recibo</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form v-on:submit.prevent="modificarRecibo" id="formModificarLote" novalidate>
+        <div class="modal-body" v-if="reciboAModificar">
+            <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
+            
+            
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
@@ -612,7 +634,7 @@
             
             // Inicializar Modales de Bootstrap para poder abrirlos/cerrarlos desde JS
             this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
-            //this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
+            this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
         },
     computed: {
@@ -884,6 +906,10 @@
                 // Configurar el botón "Eliminar" del modal (si no usas click directo en el botón)
                 const btnEliminar = document.getElementById('confirmDeleteButton');
                 btnEliminar.onclick = () => this.eliminarReciboConfirmado();
+            },
+            mostrarModalModificar(recibo) {
+                this.reciboAModificar = { ...recibo };
+                this.modalModificarBS.show();
             },
             async eliminarReciboConfirmado() {
                 if (!this.reciboAEliminar) return;

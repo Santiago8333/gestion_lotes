@@ -26,6 +26,11 @@ namespace gestion_lotes.Models
         {
             return _context.Recibo_persona_fisica;
         }
+        public IQueryable<Recibo_persona_fisica> ObtenerTodosyPagos()
+        {
+            return _context.Recibo_persona_fisica
+                        .Include(r => r.FormasDePago); 
+        }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {
             return _context.Recibo_persona_fisica.Find(id);

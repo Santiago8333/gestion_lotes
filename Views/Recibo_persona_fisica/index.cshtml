@@ -559,8 +559,8 @@
       <form v-on:submit.prevent="modificarRecibo" id="formModificarLote" novalidate>
         <div class="modal-body" v-if="reciboAModificar">
             <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
-            
-            
+            <h2>modificar formas de pago</h2>
+            <h2>modificar datos del recibo</h2>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -861,7 +861,7 @@
                 this.cargarRecibo();
 
             } catch (error) {
-                console.error('Error al crear lote:', error);
+                console.error('Error al crear Recibo:', error);
                 this.modalAgregarBS.hide();
                 this.mostrarToast(error.message);
             }
@@ -908,8 +908,40 @@
                 btnEliminar.onclick = () => this.eliminarReciboConfirmado();
             },
             mostrarModalModificar(recibo) {
-                this.reciboAModificar = { ...recibo };
+                this.reciboAModificar = recibo;
                 this.modalModificarBS.show();
+            },async modificarRecibo() {
+                const form = document.getElementById('formModificarRecibo');
+                const formData = new FormData(form);
+            
+                console.log("Modificando recibo:", this.reciboAModificar);
+                /*
+                 try {
+                    // 2. Enviar la petición a la API
+                    const response = await fetch(`/api/lotes/${this.loteAModificar.id_lote}`, {
+                        method: 'PUT', 
+                        body: formData
+                      
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.mensaje || 'Error al modificar el lote.');
+                    }
+
+                    
+                    this.modalModificarBS.hide();
+                    form.reset();
+                    this.mostrarToast("Lote modificado exitosamente");
+                    this.cargarLotes();
+                    
+                } catch (error) {
+                    console.error('Error al modificar usuario:', error);
+                    this.modalModificarBS.hide();
+                    this.mostrarToast(error.message); 
+                }
+                */
             },
             async eliminarReciboConfirmado() {
                 if (!this.reciboAEliminar) return;

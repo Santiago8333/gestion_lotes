@@ -13,6 +13,7 @@ namespace gestion_lotes.Models
         Task<int> EliminarDirecto(int id);
         Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
+        IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes();
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -26,10 +27,11 @@ namespace gestion_lotes.Models
         {
             return _context.Recibo_persona_fisica;
         }
-        public IQueryable<Recibo_persona_fisica> ObtenerTodosyPagos()
+        public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes()
         {
             return _context.Recibo_persona_fisica
-                        .Include(r => r.FormasDePago); 
+                        .Include(r => r.FormasDePago)
+                        .Include(r => r.Lote); 
         }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {

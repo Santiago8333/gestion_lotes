@@ -35,7 +35,7 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1)
 {
     int registrosPorPagina = 5;
 
-    var consultaRecibo = repo.ObtenerTodos().OrderBy(u => u.fecha_creacion);
+    var consultaRecibo = repo.ObtenerTodosyFormasPagosyLotes().OrderBy(u => u.fecha_creacion);
     var totalDeRegistros = await consultaRecibo.CountAsync();
 
     var reciboPaginados = await consultaRecibo

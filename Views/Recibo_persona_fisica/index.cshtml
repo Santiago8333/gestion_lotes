@@ -559,8 +559,43 @@
       <form v-on:submit.prevent="modificarRecibo" id="formModificarLote" novalidate>
         <div class="modal-body" v-if="reciboAModificar">
             <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
-            <h2>modificar formas de pago</h2>
-            <h2>modificar datos del recibo</h2>
+            <div class="card mb-3 bg-light">
+                <div class="card-body">
+                    <h2>Lote que tiene el Recibo</h2>
+
+            <div v-if="reciboAModificar.lote">
+                <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                    <div>
+                        <strong>Lote N°: {{ reciboAModificar.lote.n_lote }}</strong><br>
+                        <small>Base: ${{ reciboAModificar.lote.base }} | Marca: {{ reciboAModificar.lote.marca }}</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="limpiarLoteModificar">Cambiar / Quitar</button>
+                </div>
+
+                <div class="mb-2">
+                    <label for="precio_subastado" class="form-label fw-bold text-primary">Precio Final Subastado</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" 
+                               class="form-control fw-bold" 
+                               id="precio_subastado" 
+                               name="precio_subastado" 
+                               v-model="reciboAModificar.precio_subastado"
+                               step="0.01"
+                               :value="reciboAModificar.precio_subastado"
+                               required> 
+                    </div>
+                </div>
+
+                <input type="hidden" name="id_lote" :value="reciboAModificar.lote.id_lote">
+            </div>
+
+
+
+
+                </div>
+            </div>
+           
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -752,8 +787,6 @@
                     console.log("Lote seleccionado:", this.loteSeleccionado);
                     
                 },
-            
-
         limpiarLote() {
             this.loteSeleccionado = null;
             this.busquedaLote = '';
@@ -761,7 +794,13 @@
             this.precioSubastado = 0
             this.porcentajeLote = 30;
             this.resetearFormasPago();
-        },resetearFormasPago() {
+        },
+        limpiarLoteModificar() {
+            this.reciboAModificar.lote = null;
+            this.reciboAModificar.id_lote = 0;
+        //this.idLoteSeleccionadoTemporal = "";
+        },
+        resetearFormasPago() {
             this.pagos = {
                 gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
                 cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },

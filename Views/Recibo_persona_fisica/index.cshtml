@@ -561,9 +561,9 @@
             <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
             <div class="card mb-3 bg-light">
                 <div class="card-body">
-                    <h2>Lote que tiene el Recibo</h2>
 
             <div v-if="reciboAModificar.lote">
+                <h2 class="text-secondary">Lote que tiene el Recibo</h2>
                 <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
                     <div>
                         <strong>Lote N°: {{ reciboAModificar.lote.n_lote }}</strong><br>
@@ -582,13 +582,56 @@
                                name="precio_subastado" 
                                v-model="reciboAModificar.precio_subastado"
                                step="0.01"
-                               :value="reciboAModificar.precio_subastado"
                                required> 
                     </div>
                 </div>
 
                 <input type="hidden" name="id_lote" :value="reciboAModificar.lote.id_lote">
             </div>
+
+
+            <div v-else>
+                    <h2 class="text-secondary">Buscar Nuevo Lote</h2>
+                    <label class="form-label fw-bold">Ingrese N° de Lote</label>
+            
+                    <div class="input-group mb-2">
+                        <input type="text" 
+                               class="form-control" 
+                               v-model="busquedaLoteModificar"
+                               v-on:keypress.enter.prevent="buscarLoteModificar"
+                               ref="inputBusqueda"> <button class="btn btn-primary" 
+                                type="button" 
+                                v-on:click="buscarLoteModificar" 
+                                :disabled="cargando">
+                            <span v-if="cargando" class="spinner-border spinner-border-sm"></span>
+                            <span v-else>Buscar</span>
+                        </button>
+                    </div>
+
+                    <div v-if="errorBusquedaModificar" class="text-danger small mb-2">
+                        {{ errorBusquedaModificar }}
+                    </div>
+
+                    <div v-if="resultadosBusquedaModificar.length > 0" class="list-group mb-3 shadow-sm">
+                        <button type="button" 
+                                class="list-group-item list-group-item-action list-group-item-primary"
+                                v-for="lote in resultadosBusquedaModificar" 
+                                :key="lote.id"
+                                v-on:click="seleccionarLoteModificar(lote)">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Lote N° {{ lote.n_lote }}</h5>
+                                <small>${{ lote.base }}</small>
+                            </div>
+                            <small class="text-muted">Marca: {{ lote.marca }}</small>
+                        </button>
+                    </div>
+                    
+                    <div v-if="resultadosBusquedaModificar.length === 0 && busquedaLoteModificar !== '' && !cargandoModificar && busquedaRealizada" class="text-muted text-center mt-2">
+                        <small>No se encontraron lotes.</small>
+                    </div>
+                </div>
+
+
 
 
 
@@ -624,7 +667,7 @@
                 recibos: [],
                 paginaActual: 1,
                 totalPaginas: 0,
-                busquedaLote: '',      // Lo que escribe el usuario
+                busquedaLote: '',
                 loteSeleccionado: null,
                 errorBusqueda: null,
                 cargando: false,
@@ -641,6 +684,11 @@
                 modalModificarBS: null,
                 
                 toastBS: null,
+                busquedaLoteModificar: '',
+                cargandoModificar: false,
+                errorBusquedaModificar: null,
+                resultadosBusquedaModificar: [],
+                loteSeleccionadoModificar: null,
                 pagos: {
                 gobierno: { 
                     efectivo: 0, transferencia: 0, 
@@ -751,7 +799,6 @@
                         if (response.ok) {
                             const data = await response.json();
                             
-                            // Verificamos si data es un array o un objeto único
                             if (Array.isArray(data)) {
                                 this.resultadosBusqueda = data;
                                 
@@ -759,7 +806,6 @@
                                     this.errorBusqueda = "No se encontraron coincidencias.";
                                 }
                             } else {
-                                // Si la API devolvió un solo objeto, lo convertimos en array
                                 this.resultadosBusqueda = [data];
                             }
 
@@ -777,8 +823,46 @@
                         this.cargando = false;
                     }
                 },
+                async buscarLoteModificar() {
+                    if (!this.busquedaLoteModificar) return;
+                    
+                    this.cargandoModificar = true;
+                    this.errorBusquedaModificar = null;
+                    this.resultadosBusquedaModificar = []; 
+                    this.loteSeleccionadoModificar = null; 
 
-                
+                    try {
+                        
+                        const response = await fetch(`/api/buscar/lotes/${encodeURIComponent(this.busquedaLoteModificar)}`);
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            
+                            if (Array.isArray(data)) {
+                                this.resultadosBusquedaModificar = data;
+                                
+                                if (data.length === 0) {
+                                    this.errorBusquedaModificar = "No se encontraron coincidencias.";
+                                }
+                            } else {
+                                this.resultadosBusquedaModificar = [data];
+                            }
+
+                        } else {
+                            if (response.status === 404) {
+                                this.errorBusquedaModificar = "No se encontró un lote con ese número.";
+                            } else {
+                                this.errorBusquedaModificar = "Error al buscar el lote.";
+                            }
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        this.errorBusquedaModificar = "Error de conexión con el servidor.";
+                    } finally {
+                        this.cargandoModificar = false;
+                    }
+                },
                 seleccionarLote(lote) {
                     this.loteSeleccionado = lote;      
                     this.busquedaLote = lote.numero;   
@@ -798,7 +882,13 @@
         limpiarLoteModificar() {
             this.reciboAModificar.lote = null;
             this.reciboAModificar.id_lote = 0;
-        //this.idLoteSeleccionadoTemporal = "";
+            this.busquedaLoteModificar = '';
+            this.resultadosBusquedaModificar = [];
+        },
+        seleccionarLoteModificar(lote) {
+            this.reciboAModificar.lote = lote; 
+            this.resultadosBusquedaModificar = [];
+            this.busquedaLoteModificar = '';
         },
         resetearFormasPago() {
             this.pagos = {

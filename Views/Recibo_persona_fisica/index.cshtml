@@ -631,7 +631,45 @@
                     </div>
                 </div>
 
+        <h5 class="mb-3 text-secondary"><i class="bi bi-calculator"></i> Liquidación Total</h5>
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">% Pago Lote</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" 
+                           class="form-control" 
+                           id="pago_lote"
+                           name="pago_lote"
+                           v-model.number="reciboAModificar.pago_lote" 
+                           min="0" max="100">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
 
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Pago Lote ($)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoPagoLote.toFixed(2)" 
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoHonorarios.toFixed(2)" 
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoSellado.toFixed(2)" 
+                       readonly>
+            </div>
+        </div>
 
 
 
@@ -689,6 +727,7 @@
                 errorBusquedaModificar: null,
                 resultadosBusquedaModificar: [],
                 loteSeleccionadoModificar: null,
+                busquedaRealizada: false,
                 pagos: {
                 gobierno: { 
                     efectivo: 0, transferencia: 0, 

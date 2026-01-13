@@ -580,7 +580,7 @@
                                class="form-control fw-bold" 
                                id="precio_subastado" 
                                name="precio_subastado" 
-                               v-model="reciboAModificar.precio_subastado"
+                               v-model="precioSubastadoModificar"
                                step="0.01"
                                required> 
                     </div>
@@ -650,7 +650,7 @@
                 <label class="form-label small fw-bold">Pago Lote ($)</label>
                 <input type="text" 
                        class="form-control form-control-sm bg-white" 
-                       :value="montoPagoLote.toFixed(2)" 
+                       :value="montoPagoLoteModificar.toFixed(2)" 
                        readonly>
             </div>
 
@@ -658,7 +658,7 @@
                 <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
                 <input type="text" 
                        class="form-control form-control-sm bg-white" 
-                       :value="montoHonorarios.toFixed(2)" 
+                       :value="montoHonorariosModificar.toFixed(2)" 
                        readonly>
             </div>
 
@@ -666,7 +666,7 @@
                 <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
                 <input type="text" 
                        class="form-control form-control-sm bg-white" 
-                       :value="montoSellado.toFixed(2)" 
+                       :value="montoSelladoModificar.toFixed(2)" 
                        readonly>
             </div>
         </div>
@@ -728,6 +728,8 @@
                 resultadosBusquedaModificar: [],
                 loteSeleccionadoModificar: null,
                 busquedaRealizada: false,
+                precioSubastadoModificar: 0,
+                porcentajeLoteModificar: 30,
                 pagos: {
                 gobierno: { 
                     efectivo: 0, transferencia: 0, 
@@ -761,6 +763,29 @@
         },
     computed: {
         // 1. Calcula cuánto es el % del lote (ej: el 30% del precio)
+        montoPagoLoteModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            let porcentaje = parseFloat(this.porcentajeLote) || 0;
+            return precio * (porcentaje / 100);
+        },
+        montoHonorariosModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio * 0.10;
+        },
+        // 3. Calcula el 0.6% fijo de Sellado
+        montoSelladoModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio * 0.006;
+        },
+        totalPagarAhoraModificar() {
+            return this.montoPagoLoteModificar + this.montoHonorariosModificar + this.montoSelladoModificar;
+        },
+        // 5. Calcula lo que falta pagar del lote (Total - lo que pagó del lote)
+        saldoRestanteModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio - this.montoPagoLoteModificar;
+        },
+        // 1. Calcula cuánto es el % del lote (ej: el 30% del precio)
         montoPagoLote() {
             let precio = parseFloat(this.precioSubastado) || 0;
             let porcentaje = parseFloat(this.porcentajeLote) || 0;
@@ -788,7 +813,8 @@
         saldoRestante() {
             let precio = parseFloat(this.precioSubastado) || 0;
             return precio - this.montoPagoLote;
-        },sumaPagosGobierno() {
+        },
+        sumaPagosGobierno() {
         const p = this.pagos.gobierno;
         const efectivo = parseFloat(p.efectivo) || 0;
         const transf = parseFloat(p.transferencia) || 0;
@@ -1077,6 +1103,7 @@
             },
             mostrarModalModificar(recibo) {
                 this.reciboAModificar = recibo;
+                this.precioSubastadoModificar = recibo.precio_subastado;
                 this.modalModificarBS.show();
             },async modificarRecibo() {
                 const form = document.getElementById('formModificarRecibo');

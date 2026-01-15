@@ -520,7 +520,8 @@
                 <input type="text" class="form-control" id="provincia" name="provincia" required>
             </div>
 
-        </div> </div>
+        </div> 
+        </div>
 
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -736,6 +737,11 @@
                     <span v-else>Completo <i class="bi bi-check-circle"></i></span>
                 </div>
             </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosGobiernoMod / (montoPagoLoteModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
+            </div>
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label class="small fw-bold">Efectivo</label>
@@ -746,10 +752,11 @@
                     <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.gobierno.transferencia">
                 </div>
             </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
             <div class="row g-2">
                 <div class="col-6">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text">US$</span>
+                        <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.dolar_monto">
                     </div>
                 </div>
@@ -765,13 +772,13 @@
                 <div class="col-6">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">€</span>
-                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_monto" placeholder="Monto">
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.euro_monto" placeholder="Monto">
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text text-muted">Cotiz.</span>
-                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_cotizacion" placeholder="Valor toma">
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.euro_cotizacion" placeholder="Valor toma">
                     </div>
                 </div>
             </div>
@@ -788,6 +795,11 @@
                     <span v-else>Completo</span>
                 </div>
             </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosCMCPSLMod / (montoHonorariosModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
+            </div>
             <div class="row g-2 mb-3">
                 <div class="col-6">
                     <label class="small fw-bold">Efectivo</label>
@@ -798,10 +810,11 @@
                     <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.cmcpsl.transferencia">
                 </div>
             </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
              <div class="row g-2">
                 <div class="col-6">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text">US$</span>
+                        <span class="input-group-text">$</span>
                         <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.dolar_monto">
                     </div>
                 </div>
@@ -817,13 +830,13 @@
                 <div class="col-6">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text">€</span>
-                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_monto" placeholder="Monto">
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.euro_monto" placeholder="Monto">
                     </div>
                 </div>
                 <div class="col-6">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text text-muted">Cotiz.</span>
-                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_cotizacion" placeholder="Valor toma">
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.euro_cotizacion" placeholder="Valor toma">
                     </div>
                 </div>
             </div>
@@ -838,6 +851,11 @@
                     <span v-if="faltaDPIPMod > 0.5">Falta: ${{ faltaDPIPMod.toFixed(2) }}</span>
                     <span v-else>Completo</span>
                 </div>
+            </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosDPIPMod / (montoSelladoModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
             </div>
             <div class="row g-2 mb-3">
                 <div class="col-6">
@@ -884,6 +902,53 @@
 
 </div>
 
+
+<div class="modal-body">
+        <div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" v-model="reciboAModificar.nombre" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" v-model="reciboAModificar.apellido" required>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="tipo_dni" class="form-label">Tipo Dni</label>
+                <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" v-model="reciboAModificar.tipo_dni" required>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="dni" class="form-label">Dni</label>
+                <input type="text" class="form-control" id="dni" name="dni" v-model="reciboAModificar.dni" required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" v-model="reciboAModificar.email" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono" v-model="reciboAModificar.telefono" required>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control" id="domicilio" name="domicilio" v-model="reciboAModificar.domicilio" required>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="codigo_postal" class="form-label">C.P.</label>
+                <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" v-model="reciboAModificar.codigo_postal" required>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="provincia" class="form-label">Provincia</label>
+                <input type="text" class="form-control" id="provincia" name="provincia" v-model="reciboAModificar.provincia" required>
+            </div>
+
+        </div> 
+        </div>
 
 
         </div>
@@ -1339,6 +1404,7 @@
                 btnEliminar.onclick = () => this.eliminarReciboConfirmado();
             },
             mostrarModalModificar(recibo) {
+                console.log(recibo);
                 this.reciboAModificar = recibo;
                 this.precioSubastadoModificar = recibo.precio_subastado;
                 this.porcentajeLoteModificar = recibo.pago_lote;
@@ -1347,8 +1413,8 @@
                     cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
                     dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
                 };
-                if (recibo.lista_pagos && Array.isArray(recibo.lista_pagos)) {
-        recibo.lista_pagos.forEach(pago => {
+        if (recibo.formasDePago && Array.isArray(recibo.formasDePago)) {
+            recibo.formasDePago.forEach(pago => {
             let entidad = '';
             if (pago.destinatario === 'Gobierno') entidad = 'gobierno';
             else if (pago.destinatario === 'Cmcpsl') entidad = 'cmcpsl';
@@ -1365,6 +1431,9 @@
                 };
             }
         });
+       
+
+        
     }
                 this.modalModificarBS.show();
             },

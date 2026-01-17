@@ -109,7 +109,7 @@ public async Task<IActionResult> EliminarRecibo(int id)
 }
 [HttpPut]
 [Route("/api/recibosmd")]
-public async Task<IActionResult> Modificar([FromBody] CrearReciboRequest datos)
+public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestMd datos)
 {
     ModelState.Remove("creado_por");
     ModelState.Remove("fecha_creacion");
@@ -129,7 +129,7 @@ public async Task<IActionResult> Modificar([FromBody] CrearReciboRequest datos)
             return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
         }
         string usuario = User.Identity?.Name ?? "Sistema";
-        var recibo = await repo.CrearReciboConPagos(datos,usuario);
+        var recibo = await repo.ModificarReciboConPagos(datos.id_recibo_persona_fisica,datos,usuario);
         
         return Ok(new { mensaje = "Recibo modificado"});
     }

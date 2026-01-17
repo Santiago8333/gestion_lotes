@@ -14,7 +14,7 @@ namespace gestion_lotes.Models
         Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
         IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes();
-        Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequest request, string usuarioModificador);
+        Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -156,7 +156,7 @@ namespace gestion_lotes.Models
                 .Include(r => r.FormasDePago)
                 .FirstOrDefaultAsync(r => r.id_recibo_persona_fisica == id);
         }
-public async Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequest request, string usuarioModificador)
+public async Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador)
 {
     using var transaction = await _context.Database.BeginTransactionAsync();
 

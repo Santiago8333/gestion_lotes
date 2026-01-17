@@ -21,6 +21,10 @@
                             <th scope="col">Provincia</th>
                             <th scope="col">Precio Subastado</th>
                             <th scope="col">Fecha de Creación</th>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                            <th scope="col">Creado Por</th>
+                            }
                             <th scope="col">Acción</th>
                         </tr>
                     </thead>
@@ -38,6 +42,10 @@
                             <td>{{ recibo.provincia }}</td>
                             <td>{{ recibo.precio_subastado }}</td>
                             <td>{{ formatearFecha(recibo.fecha_creacion) }}</td>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <td>{{ recibo.creado_por }}</td>
+                            }
                             <td>
                                 <div class="dropdown position-static">
                                     <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -557,7 +565,7 @@
         <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Recibo</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form v-on:submit.prevent="modificarRecibo" id="formModificarLote" novalidate>
+      <form v-on:submit.prevent="modificarRecibo" id="formModificarRecibo" novalidate>
         <div class="modal-body" v-if="reciboAModificar">
             <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
             <div class="card mb-3 bg-light">

@@ -107,4 +107,35 @@ public async Task<IActionResult> EliminarRecibo(int id)
         return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el recibo."+ex });
     }
 }
+[HttpPut]
+[Route("/api/recibosmd")]
+public async Task<IActionResult> Modificar([FromBody] CrearReciboRequest datos)
+{
+    ModelState.Remove("creado_por");
+    ModelState.Remove("fecha_creacion");
+     if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+
+    try
+    {
+        bool LoteExiste = await repo.ExisteReciboEnLote(datos.id_lote);
+
+        if (LoteExiste)
+        {
+            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
+        }
+        string usuario = User.Identity?.Name ?? "Sistema";
+        var recibo = await repo.CrearReciboConPagos(datos,usuario);
+        
+        return Ok(new { mensaje = "Recibo modificado"});
+    }
+    catch (Exception ex)
+    {
+         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

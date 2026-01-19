@@ -1445,15 +1445,74 @@
     }
                 this.modalModificarBS.show();
             },
-            async modificarRecibo() {
+    async modificarRecibo() {
                 const form = document.getElementById('formModificarRecibo');
                 const formData = new FormData(form);
-            
-                console.log("Modificando recibo:", this.reciboAModificar);
+                const datosPersonales = Object.fromEntries(formData.entries());
+                const listaPagosArray = [];
+                const limpiarNumero = (val) => parseFloat(val) || 0;
+                if (this.pagosModificar.gobierno) {
+                    listaPagosArray.push({
+                    destinatario: "Gobierno", // Agregamos el nombre manualmente
+                    efectivo: limpiarNumero(this.pagosModificar.gobierno.efectivo),
+                    transferencia: limpiarNumero(this.pagosModificar.gobierno.transferencia),
+                    dolar_monto: limpiarNumero(this.pagosModificar.gobierno.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagosModificar.gobierno.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagosModificar.gobierno.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagosModificar.gobierno.euro_cotizacion)
+                });
+            }
+
+            // B. Procesar CMCPSL
+            if (this.pagosModificar.cmcpsl) {
+                listaPagosArray.push({
+                    destinatario: "Cmcpsl",
+                    efectivo: limpiarNumero(this.pagosModificar.cmcpsl.efectivo),
+                    transferencia: limpiarNumero(this.pagosModificar.cmcpsl.transferencia),
+                    dolar_monto: limpiarNumero(this.pagosModificar.cmcpsl.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagosModificar.cmcpsl.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagosModificar.cmcpsl.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagosModificar.cmcpsl.euro_cotizacion)
+                });
+            }
+
+            // C. Procesar DPIP
+            if (this.pagosModificar.dpip) {
+                listaPagosArray.push({
+                    destinatario: "Dpip",
+                    efectivo: limpiarNumero(this.pagosModificar.dpip.efectivo),
+                    transferencia: limpiarNumero(this.pagosModificar.dpip.transferencia),
+                    dolar_monto: limpiarNumero(this.pagosModificar.dpip.dolar_monto),
+                    dolar_cotizacion: limpiarNumero(this.pagosModificar.dpip.dolar_cotizacion),
+                    euro_monto: limpiarNumero(this.pagosModificar.dpip.euro_monto),
+                    euro_cotizacion: limpiarNumero(this.pagosModificar.dpip.euro_cotizacion)
+                });
+            }
+        const payload = {
+            // Datos de la persona (spread operator para sacar lo del form)
+            nombre: datosPersonales.nombre,
+            apellido: datosPersonales.apellido,
+            dni: datosPersonales.dni,
+            tipo_dni: datosPersonales.tipo_dni,
+            email: datosPersonales.email,
+            telefono: datosPersonales.telefono,
+            domicilio: datosPersonales.domicilio,
+            codigo_postal: datosPersonales.codigo_postal,
+            provincia: datosPersonales.provincia,
+            pago_lote: datosPersonales.pago_lote,
+
+            // Datos del recibo y lote
+            id_lote: this.loteSeleccionadoModificar?.id_lote || datosPersonales.id_lote,
+            precio_subastado: parseFloat(this.datosPersonales?.precio_subastado || this.precioSubastadoModificar),
+            id_recibo_persona_fisica: datosPersonales.id_recibo_persona_fisica,
+
+            lista_pagos: listaPagosArray
+        };
+                console.log("Modificando recibo:", payload);
                 /*
                  try {
                     // 2. Enviar la petición a la API
-                    const response = await fetch(`/api/lotes/${this.loteAModificar.id_lote}`, {
+                    const response = await fetch(`/api/recibosmd`, {
                         method: 'PUT', 
                         body: formData
                       
@@ -1462,21 +1521,22 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        throw new Error(data.mensaje || 'Error al modificar el lote.');
+                        throw new Error(data.mensaje || 'Error al modificar el Recibo.');
                     }
 
                     
                     this.modalModificarBS.hide();
                     form.reset();
-                    this.mostrarToast("Lote modificado exitosamente");
-                    this.cargarLotes();
+                    this.mostrarToast("Recibo modificado exitosamente");
+                    this.cargarRecibo();
                     
                 } catch (error) {
-                    console.error('Error al modificar usuario:', error);
+                    console.error('Error al modificar Recibo:', error);
                     this.modalModificarBS.hide();
                     this.mostrarToast(error.message); 
                 }
                 */
+                
             },
             async eliminarReciboConfirmado() {
                 if (!this.reciboAEliminar) return;

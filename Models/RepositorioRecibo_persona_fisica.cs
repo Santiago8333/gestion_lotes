@@ -15,6 +15,7 @@ namespace gestion_lotes.Models
         Task<bool> ExisteReciboEnLote(int id);
         IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes();
         Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
+        Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir);
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -238,6 +239,10 @@ public async Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, C
         await transaction.RollbackAsync();
         throw;
     }
+}
+public async Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir)
+{
+    return await _context.Recibo_persona_fisica.AnyAsync(r => r.id_lote == idLote && r.id_recibo_persona_fisica != idReciboAExcluir);
 }
     }
     

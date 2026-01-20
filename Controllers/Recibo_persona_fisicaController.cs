@@ -122,7 +122,7 @@ public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestMd datos
 
     try
     {
-        bool LoteExiste = await repo.ExisteReciboEnLote(datos.id_lote);
+        bool LoteExiste = await repo.ExisteReciboEnLoteMd(datos.id_lote,datos.id_recibo_persona_fisica);
 
         if (LoteExiste)
         {

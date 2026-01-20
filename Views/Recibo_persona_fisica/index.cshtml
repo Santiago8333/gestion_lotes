@@ -1509,12 +1509,15 @@
             lista_pagos: listaPagosArray
         };
                 console.log("Modificando recibo:", payload);
-                /*
+                
                  try {
                     // 2. Enviar la petición a la API
                     const response = await fetch(`/api/recibosmd`, {
-                        method: 'PUT', 
-                        body: formData
+                        method: 'PUT',
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
                       
                     });
 
@@ -1535,7 +1538,7 @@
                     this.modalModificarBS.hide();
                     this.mostrarToast(error.message); 
                 }
-                */
+                
                 
             },
             async eliminarReciboConfirmado() {

@@ -324,6 +324,11 @@
             },
             async crearUsuario() {
                 const form = document.getElementById('formAgregarUsuario');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
                 // FormData es esencial para enviar archivos (AvatarFile)
                 const formData = new FormData(form);
 
@@ -350,13 +355,18 @@
 
                 } catch (error) {
                     console.error('Error al crear usuario:', error);
-                    this.modalAgregar.hide();
+                    //this.modalAgregar.hide();
                     this.mostrarToast(error.message);
                 }
             },
             async modificarUsuario() {
                 
                 const form = document.getElementById('formModificarUsuario');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
                 const formData = new FormData(form);
                 
                 

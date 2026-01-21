@@ -46,12 +46,37 @@ namespace gestion_lotes.Models
             await _context.SaveChangesAsync();
             return lote;
         }
-        public async Task<int> EliminarDirecto(int id)
+    public async Task<int> EliminarDirecto(int idLote)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            return await _context.Lotes
-                .Where(u => u.id_lote == id)
+            
+            await _context.Forma_Pagos
+            .Where(fp => _context.Recibo_persona_fisica
+                .Where(r => r.id_lote == idLote)
+                .Select(r => r.id_recibo_persona_fisica)
+                .Contains(fp.id_recibo_persona_fisica))
+            .ExecuteDeleteAsync();
+
+           await _context.Recibo_persona_fisica
+            .Where(r => r.id_lote == idLote)
+            .ExecuteDeleteAsync();
+
+            var lotesEliminados = await _context.Lotes
+                .Where(u => u.id_lote == idLote)
                 .ExecuteDeleteAsync();
+
+            await transaction.CommitAsync();
+
+            return lotesEliminados;
         }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
     public async Task<Lotes?> Modificar(Lotes lote)
     {
 

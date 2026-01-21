@@ -80,7 +80,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        ¿Estás seguro de que deseas eliminar este Lote?
+        ¿Estás seguro de que deseas eliminar este Lote? se eliminaran recibos asociados
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -98,32 +98,38 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form v-on:submit.prevent="crearLote" id="formAgregarLote" novalidate>
+      <form v-on:submit.prevent="crearLote" id="formAgregarLote" class="needs-validation" novalidate>
       @Html.AntiForgeryToken()
         <div class="modal-body">
             <div class="mb-3">
                 <label for="n_lote" class="form-label">Número de Lote</label>
                 <input type="number" class="form-control" id="n_lote" name="n_lote" required>
+                <div class="invalid-feedback">El Número de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="marca" class="form-label">Marca</label>
                 <input type="text" class="form-control" id="marca" name="marca" required>
+                <div class="invalid-feedback">La Marca es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="modelo" class="form-label">Modelo</label>
                 <input type="text" class="form-control" id="modelo" name="modelo" required>
+                <div class="invalid-feedback">El Modelo es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="dominio" class="form-label">Dominio</label>
                 <input type="text" class="form-control" id="dominio" name="dominio" required>
+                <div class="invalid-feedback">El Dominio es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="anio" class="form-label">Año</label>
                 <input type="text" class="form-control" id="anio" name="anio" required>
+                <div class="invalid-feedback">El Año es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="base" class="form-label">Base</label>
                 <input type="number" class="form-control" id="base" name="base" required>
+                <div class="invalid-feedback">El Base es obligatorio.</div>
             </div>
         </div>
         <div class="modal-footer">
@@ -143,7 +149,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-      <form v-on:submit.prevent="modificarLote" id="formModificarLote" novalidate>
+      <form v-on:submit.prevent="modificarLote" class="needs-validation" id="formModificarLote" novalidate>
       @Html.AntiForgeryToken()
         <div class="modal-body" v-if="loteAModificar">
             <input type="hidden" name="id_lote" v-model="loteAModificar.id_lote" />
@@ -151,26 +157,32 @@
             <div class="mb-3">
                 <label for="mod_n_lote" class="form-label">Número de Lote</label>
                 <input type="number" class="form-control" id="mod_n_lote" name="n_lote" v-model="loteAModificar.n_lote" required>
+                <div class="invalid-feedback">El Número de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="mod_marca" class="form-label">Marca</label>
                 <input type="text" class="form-control" id="mod_marca" name="marca" v-model="loteAModificar.marca" required>
+                <div class="invalid-feedback">El Marca de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="mod_modelo" class="form-label">Modelo</label>
                 <input type="text" class="form-control" id="mod_modelo" name="modelo" v-model="loteAModificar.modelo" required>
+                <div class="invalid-feedback">El Modelo de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="mod_dominio" class="form-label">Dominio</label>
                 <input type="text" class="form-control" id="mod_dominio" name="dominio" v-model="loteAModificar.dominio" required>
+                <div class="invalid-feedback">El Dominio de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="mod_anio" class="form-label">Año</label>
                 <input type="number" class="form-control" id="mod_anio" name="anio" v-model="loteAModificar.anio" required>
+                <div class="invalid-feedback">El Año de Lote es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="mod_base" class="form-label">Base</label>
                 <input type="number" class="form-control" id="mod_base" name="base" v-model="loteAModificar.base" required>
+                <div class="invalid-feedback">El Base de Lote es obligatorio.</div>
             </div>
         </div>
         <div class="modal-footer">
@@ -269,6 +281,11 @@
             async crearLote() {
                 // 1. Obtener datos del form
                 const form = document.getElementById('formAgregarLote');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
                 const formData = new FormData(form);
             
                 
@@ -309,6 +326,11 @@
 
             async modificarLote() {
                 const form = document.getElementById('formModificarLote');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
                 const formData = new FormData(form);
             
                 //console.log("Modificando lote:", this.loteAModificar);

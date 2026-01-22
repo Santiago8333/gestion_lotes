@@ -98,7 +98,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       
-  <form v-on:submit.prevent="crearRecibo" id="formAgregarRecibo" novalidate>
+  <form v-on:submit.prevent="crearRecibo" id="formAgregarRecibo" class="needs-validation" novalidate>
     @Html.AntiForgeryToken()
     
     <div class="card mb-3 bg-light">
@@ -155,6 +155,7 @@
                                v-model="precioSubastado"
                                step="0.01"
                                required> 
+                        <div class="invalid-feedback">El Precio Final Subastado es obligatorio.</div>
                     </div>
                 </div>
 
@@ -490,42 +491,51 @@
             <div class="col-md-6 mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" required>
+                <div class="invalid-feedback">El Nombre es obligatorio.</div>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="apellido" class="form-label">Apellido</label>
                 <input type="text" class="form-control" id="apellido" name="apellido" required>
+                <div class="invalid-feedback">El Apellido es obligatorio.</div>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label for="tipo_dni" class="form-label">Tipo Dni</label>
                 <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" required>
+                <div class="invalid-feedback">El Tipo Dni es obligatorio.</div>
             </div>
             <div class="col-md-8 mb-3">
                 <label for="dni" class="form-label">Dni</label>
                 <input type="text" class="form-control" id="dni" name="dni" required>
+                <div class="invalid-feedback">El Dni es obligatorio.</div>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email" name="email" required>
+                <div class="invalid-feedback">El Email es obligatorio.</div>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="telefono" class="form-label">Telefono</label>
                 <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                <div class="invalid-feedback">El Telefono es obligatorio.</div>
             </div>
 
             <div class="col-12 mb-3">
                 <label for="domicilio" class="form-label">Domicilio</label>
                 <input type="text" class="form-control" id="domicilio" name="domicilio" required>
+                <div class="invalid-feedback">El Domicilio es obligatorio.</div>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label for="codigo_postal" class="form-label">C.P.</label>
                 <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" required>
+                <div class="invalid-feedback">El C.P. es obligatorio.</div>
             </div>
             <div class="col-md-8 mb-3">
                 <label for="provincia" class="form-label">Provincia</label>
                 <input type="text" class="form-control" id="provincia" name="provincia" required>
+                <div class="invalid-feedback">El Provincia es obligatorio.</div>
             </div>
 
         </div> 
@@ -565,7 +575,7 @@
         <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Recibo</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form v-on:submit.prevent="modificarRecibo" id="formModificarRecibo" novalidate>
+      <form v-on:submit.prevent="modificarRecibo" id="formModificarRecibo" class="needs-validation" novalidate>
         <div class="modal-body" v-if="reciboAModificar">
             <input type="hidden" name="id_recibo_persona_fisica" v-model="reciboAModificar.id_recibo_persona_fisica" />
             <div class="card mb-3 bg-light">
@@ -917,42 +927,51 @@
             <div class="col-md-6 mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
                 <input type="text" class="form-control" id="nombre" name="nombre" v-model="reciboAModificar.nombre" required>
+                <div class="invalid-feedback">El Nombre es obligatorio.</div>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="apellido" class="form-label">Apellido</label>
                 <input type="text" class="form-control" id="apellido" name="apellido" v-model="reciboAModificar.apellido" required>
+                <div class="invalid-feedback">El Apellido es obligatorio.</div>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label for="tipo_dni" class="form-label">Tipo Dni</label>
                 <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" v-model="reciboAModificar.tipo_dni" required>
+                <div class="invalid-feedback">El Tipo Dni es obligatorio.</div>
             </div>
             <div class="col-md-8 mb-3">
                 <label for="dni" class="form-label">Dni</label>
                 <input type="text" class="form-control" id="dni" name="dni" v-model="reciboAModificar.dni" required>
+                <div class="invalid-feedback">El Dni es obligatorio.</div>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="email" name="email" v-model="reciboAModificar.email" required>
+                <div class="invalid-feedback">El Email es obligatorio.</div>
             </div>
             <div class="col-md-6 mb-3">
                 <label for="telefono" class="form-label">Telefono</label>
                 <input type="tel" class="form-control" id="telefono" name="telefono" v-model="reciboAModificar.telefono" required>
+                <div class="invalid-feedback">El Telefono es obligatorio.</div>
             </div>
 
             <div class="col-12 mb-3">
                 <label for="domicilio" class="form-label">Domicilio</label>
                 <input type="text" class="form-control" id="domicilio" name="domicilio" v-model="reciboAModificar.domicilio" required>
+                <div class="invalid-feedback">El Domicilio es obligatorio.</div>
             </div>
 
             <div class="col-md-4 mb-3">
                 <label for="codigo_postal" class="form-label">C.P.</label>
                 <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" v-model="reciboAModificar.codigo_postal" required>
+                <div class="invalid-feedback">El C.P. es obligatorio.</div>
             </div>
             <div class="col-md-8 mb-3">
                 <label for="provincia" class="form-label">Provincia</label>
                 <input type="text" class="form-control" id="provincia" name="provincia" v-model="reciboAModificar.provincia" required>
+                <div class="invalid-feedback">El Provincia es obligatorio.</div>
             </div>
 
         </div> 
@@ -1278,6 +1297,11 @@
                 return;
             }
             const form = document.getElementById('formAgregarRecibo');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            form.classList.add('was-validated');
             const formData = new FormData(form);
             const datosPersonales = Object.fromEntries(formData.entries());
             const listaPagosArray = [];
@@ -1319,6 +1343,28 @@
                     euro_cotizacion: limpiarNumero(this.pagos.dpip.euro_cotizacion)
                 });
             }
+
+            const TOLERANCIA = 1.00;
+            if (this.faltaCMCPSL > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago a CMCPSL. Restan: $${this.faltaCMCPSL.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago CMCPSL");
+                return;
+            }
+
+            // 2. Validar DPIP
+            if (this.faltaDPIP > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago a DPIP. Restan: $${this.faltaDPIP.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago DPIP");
+                return;
+            }
+
+            // 3. Validar Gobierno
+            if (this.faltaGobierno > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago al Gobierno. Restan: $${this.faltaGobierno.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago Gobierno");
+                return;
+            }
+            
             const payload = {
         // Datos de la persona (spread operator para sacar lo del form)
         nombre: datosPersonales.nombre,
@@ -1447,6 +1493,11 @@
             },
     async modificarRecibo() {
                 const form = document.getElementById('formModificarRecibo');
+                if (!form.checkValidity()) {
+                    form.classList.add('was-validated');
+                    return;
+                }
+                form.classList.add('was-validated');
                 const formData = new FormData(form);
                 const datosPersonales = Object.fromEntries(formData.entries());
                 const listaPagosArray = [];
@@ -1487,6 +1538,26 @@
                     euro_monto: limpiarNumero(this.pagosModificar.dpip.euro_monto),
                     euro_cotizacion: limpiarNumero(this.pagosModificar.dpip.euro_cotizacion)
                 });
+            }
+            const TOLERANCIA = 1.00;
+            if (this.faltaCMCPSLMod > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago a CMCPSL. Restan: $${this.faltaCMCPSL.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago CMCPSL");
+                return;
+            }
+
+            // 2. Validar DPIP
+            if (this.faltaDPIPMod > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago a DPIP. Restan: $${this.faltaDPIP.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago DPIP");
+                return;
+            }
+
+            // 3. Validar Gobierno
+            if (this.faltaGobiernoMod > TOLERANCIA) {
+                this.mostrarToast(`Error: Falta completar el pago al Gobierno. Restan: $${this.faltaGobierno.toFixed(2)}`);
+                console.warn("Bloqueado por falta de pago Gobierno");
+                return;
             }
         const payload = {
             // Datos de la persona (spread operator para sacar lo del form)

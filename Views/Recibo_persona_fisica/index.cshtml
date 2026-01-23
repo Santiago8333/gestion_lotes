@@ -5,6 +5,11 @@
     <div class="row">
         <div class="col-md-12 history bg-light border-right">
             <h1>Recibo Persona Fisica</h1>
+            <div class="input-group mb-2">
+                <input type="text" 
+                       class="form-control" 
+                       placeholder="filtrar por apellido y numero de lote"> 
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead>
@@ -55,6 +60,11 @@
                                         <li>
                                             <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(recibo)">
                                                 <i class="fa-solid fa-pencil"></i> Modificar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalDetalle(recibo)">
+                                                <i class="fa-solid fa-book"></i> Detalle
                                             </a>
                                         </li>
                                         <li>
@@ -567,6 +577,36 @@
     </div>
   </div>
 </div>
+    <!-- Modal detalle-->
+<div class="modal fade" id="confirmDetalleModal" tabindex="-1" aria-labelledby="confirmDetalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDetalleModalLabel">Detalle del Recibo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" v-if="reciboADetalle">
+            <div v-if="reciboADetalle.lote">
+                <h2 class="text-secondary">Lote que tiene el Recibo</h2>
+                <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                    <div>
+                        <strong>Lote N°: {{ reciboADetalle.lote.n_lote }}</strong><br>
+                        <small>@if (User.IsInRole("Administrador"))
+                            {
+                                <span class="text-danger fw-bold">ID: {{ reciboADetalle.lote.id_lote }}</span> <span>|</span> <span class="text-danger fw-bold">Creado Por: {{ reciboADetalle.lote.creado_por }}</span>
+                            }
+                            Base: ${{ reciboADetalle.lote.base }} | Marca: {{ reciboADetalle.lote.marca }} | Modelo: {{ reciboADetalle.lote.modelo }} | Dominio: {{ reciboADetalle.lote.dominio }} | Anio: {{ reciboADetalle.lote.anio }} | Base: {{ reciboADetalle.lote.base }} | Fecha de Creacion: {{ formatearFecha(reciboADetalle.lote.fecha_creacion) }} </small>
+                    </div>
+                    
+                </div>
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Modal modificar-->
 <div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -1016,12 +1056,14 @@
                 // Variables para manejar los modales
                 reciboAEliminar: null,
                 reciboAModificar: null, // Aquí guardaremos el lote que se está editando
+                reciboADetalle: null,
                 
                 // Referencias a las instancias de Bootstrap Modal
                 modalEliminarBS: null,
                 modalAgregarBS: null,
                 modalModificarBS: null,
-                
+                modalDetalleBS: null,
+
                 toastBS: null,
                 busquedaLoteModificar: '',
                 cargandoModificar: false,
@@ -1066,6 +1108,7 @@
             this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
             this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            this.modalDetalleBS = new bootstrap.Modal(document.getElementById('confirmDetalleModal'));
         },
     computed: {
         // 1. Calcula cuánto es el % del lote (ej: el 30% del precio)
@@ -1456,6 +1499,11 @@
                 // Configurar el botón "Eliminar" del modal (si no usas click directo en el botón)
                 const btnEliminar = document.getElementById('confirmDeleteButton');
                 btnEliminar.onclick = () => this.eliminarReciboConfirmado();
+            },
+            mostrarModalDetalle(recibo){
+                this.reciboADetalle = recibo;
+                console.log(recibo);
+                this.modalDetalleBS.show();
             },
             mostrarModalModificar(recibo) {
                 console.log(recibo);

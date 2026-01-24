@@ -586,6 +586,19 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" v-if="reciboADetalle">
+        @if (User.IsInRole("Administrador"))
+                            {
+                <h2 class="text-secondary">Recibo info</h2>
+                    <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                        <div>
+                            <strong>ID: {{ reciboADetalle.id_recibo_persona_fisica }}</strong><br>
+                            <small>
+                                    <span class="text-danger fw-bold">Creado Por: {{ reciboADetalle.creado_por }}</span>
+                                
+                        </div>
+                        
+                    </div>
+        }
             <div v-if="reciboADetalle.lote">
                 <h2 class="text-secondary">Lote que tiene el Recibo</h2>
                 <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
@@ -836,6 +849,52 @@
     </div>
 
 </div>
+
+
+<div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="nombre" name="nombre" v-model="reciboADetalle.nombre" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="apellido" name="apellido" v-model="reciboADetalle.apellido" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="tipo_dni" class="form-label">Tipo Dni</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="tipo_dni" name="tipo_dni" value="Dni" v-model="reciboADetalle.tipo_dni" readonly>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="dni" class="form-label">Dni</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="dni" name="dni" v-model="reciboADetalle.dni" readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-sm bg-white" id="email" name="email" v-model="reciboADetalle.email" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control form-control-sm bg-white" id="telefono" name="telefono" v-model="reciboADetalle.telefono" readonly>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="domicilio" name="domicilio" v-model="reciboADetalle.domicilio" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="codigo_postal" class="form-label">C.P.</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="codigo_postal" name="codigo_postal" v-model="reciboADetalle.codigo_postal" readonly>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="provincia" class="form-label">Provincia</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="provincia" name="provincia" v-model="reciboADetalle.provincia" readonly>
+            </div>
+
+        </div> 
 
 
             </div>

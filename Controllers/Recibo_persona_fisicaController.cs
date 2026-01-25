@@ -31,11 +31,11 @@ public IActionResult Index()
 }
 [HttpGet]
 [Route("api/recibof")]
-public async Task<IActionResult> ObtenerReciboF(int pagina = 1)
+public async Task<IActionResult> ObtenerReciboF(int pagina = 1, string? apellido = null, string? numeroLote = null)
 {
     int registrosPorPagina = 5;
 
-    var consultaRecibo = repo.ObtenerTodosyFormasPagosyLotes().OrderBy(u => u.fecha_creacion);
+    var consultaRecibo = repo.ObtenerTodosyFormasPagosyLotes(apellido,numeroLote).OrderBy(u => u.fecha_creacion);
     var totalDeRegistros = await consultaRecibo.CountAsync();
 
     var reciboPaginados = await consultaRecibo

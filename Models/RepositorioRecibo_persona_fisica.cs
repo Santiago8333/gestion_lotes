@@ -13,7 +13,7 @@ namespace gestion_lotes.Models
         Task<int> EliminarDirecto(int id);
         Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
-        IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes();
+        IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null);
         Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
         Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir);
     }
@@ -29,11 +29,24 @@ namespace gestion_lotes.Models
         {
             return _context.Recibo_persona_fisica;
         }
-        public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes()
+        public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null)
         {
-            return _context.Recibo_persona_fisica
-                        .Include(r => r.FormasDePago)
-                        .Include(r => r.Lote); 
+            var query = _context.Recibo_persona_fisica
+            .Include(r => r.FormasDePago)
+            .Include(r => r.Lote)
+            .AsQueryable(); 
+            if (!string.IsNullOrEmpty(apellido))
+            {
+                query = query.Where(r => r.apellido.Contains(apellido));
+            }
+
+            if (!string.IsNullOrEmpty(numeroLote))
+            {
+                query = query.Where(r => r.Lote != null && r.Lote.n_lote.ToString().Contains(numeroLote));
+            }
+
+        
+        return query;
         }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {

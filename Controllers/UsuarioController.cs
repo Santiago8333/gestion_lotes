@@ -44,11 +44,11 @@ public async Task<ActionResult> Logout()
 
     [HttpGet]
     [Route("api/usuarios")]
-    public async Task<IActionResult> ObtenerUsuarios(int pagina = 1)
+    public async Task<IActionResult> ObtenerUsuarios(int pagina = 1,string? email = null)
     {
         int registrosPorPagina = 10;
 
-        var consultaUsuarios = repo.ObtenerTodos().OrderBy(u => u.nombre);
+        var consultaUsuarios = repo.ObtenerTodos(email).OrderBy(u => u.nombre);
         var totalDeRegistros = await consultaUsuarios.CountAsync();
 
         var usuariosPaginados = await consultaUsuarios
@@ -220,7 +220,7 @@ public async Task<ActionResult> Logout()
         try
         {
 
-            string avatarAntiguoUrl = usuarioEnDb.avatarUrl;
+            string avatarAntiguoUrl = usuarioEnDb.avatarUrl ?? "";
 
             // 3. Tu código para manejar el NUEVO archivo
             if (avatarFile != null && avatarFile.Length > 0)

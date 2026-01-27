@@ -5,6 +5,19 @@
     <div class="row">
         <div class="col-md-12 history bg-light border-right">
             <h1>Usuarios</h1>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="busqueda" class="form-label">Buscar Usuario</label>
+                    <input 
+                        type="text" 
+                        id="busqueda"
+                        class="form-control" 
+                        placeholder="Escribe un Email"
+                        v-model="textoBusqueda"
+                        v-on:input="buscarConRetraso"
+                        >
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead>
@@ -237,7 +250,9 @@
                 modalAgregar: null,
                 modalModificar: null,
                 usuarioAModificar: null,
-                toast: null
+                toast: null,
+                textoBusqueda: '',
+                timerBusqueda: null,
             };
         },
         mounted() {
@@ -262,9 +277,22 @@
             }
         },
         methods: {
+            buscarConRetraso() {
+                if (this.timerBusqueda) clearTimeout(this.timerBusqueda);
+                
+                this.timerBusqueda = setTimeout(() => {
+                    this.paginaActual = 1; 
+                    this.cargarUsuarios();
+                }, 500); 
+            },
             async cargarUsuarios() {
                 try {
-                    const response = await fetch(`/api/usuarios?pagina=${this.paginaActual}`);
+                    let url  = `/api/usuarios?pagina=${this.paginaActual}`;
+                    if (this.textoBusqueda) {
+                            const valor = this.textoBusqueda.trim();
+                            url += `&email=${encodeURIComponent(valor)}`;
+                    }
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar los usuarios');
                     
                     const data = await response.json();

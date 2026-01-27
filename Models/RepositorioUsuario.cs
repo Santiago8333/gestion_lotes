@@ -6,7 +6,7 @@ namespace gestion_lotes.Models
 {
     public interface IUsuarioRepositorio
     {
-        IQueryable<Usuarios> ObtenerTodos();
+        IQueryable<Usuarios> ObtenerTodos(string? email = null);
         Task<Usuarios?> ObtenerPorId(int id); // Usamos '?' porque puede devolver null
         Task<int> EliminarDirecto(int id);
         Task<Usuarios> Agregar(Usuarios usuario);
@@ -24,16 +24,20 @@ namespace gestion_lotes.Models
             _context = context;
         }
 
-        public IQueryable<Usuarios> ObtenerTodos()
+        public IQueryable<Usuarios> ObtenerTodos(string? email = null)
         {
-            // Solo devolvemos el DbSet, sin ejecutar ToList()
-            return _context.Usuarios;
+
+            var query = _context.Usuarios.AsNoTracking().AsQueryable();
+            if (!string.IsNullOrEmpty(email))
+            {
+                query = query.Where(r => r.email.Contains(email.Trim()));
+            }
+            return query;
         }
 
         public async Task<Usuarios?> ObtenerPorId(int id)
         {
-            // Usamos Find() porque es la forma más eficiente de buscar por ID.
-            return _context.Usuarios.Find(id);
+            return await _context.Usuarios.FindAsync(id);
         }
         public async Task<int> EliminarDirecto(int id)
         {

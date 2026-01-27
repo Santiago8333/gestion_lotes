@@ -5,6 +5,19 @@
     <div class="row">
         <div class="col-md-12 history bg-light border-right">
             <h1>Lotes</h1>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="busqueda" class="form-label">Buscar Lotes</label>
+                    <input 
+                        type="text" 
+                        id="busqueda"
+                        class="form-control" 
+                        placeholder="Escribe un numero de lote o marca para buscar..."
+                        v-model="textoBusqueda"
+                        v-on:input="buscarConRetraso"
+                        >
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
                     <thead>
@@ -227,7 +240,9 @@
                 modalAgregarBS: null,
                 modalModificarBS: null,
                 
-                toastBS: null
+                toastBS: null,
+                textoBusqueda: '',
+                timerBusqueda: null,
             };
         },
         mounted() {
@@ -244,9 +259,27 @@
         },
         methods: {
             // --- Carga de datos ---
+            buscarConRetraso() {
+                if (this.timerBusqueda) clearTimeout(this.timerBusqueda);
+                
+                this.timerBusqueda = setTimeout(() => {
+                    this.paginaActual = 1; 
+                    this.cargarLotes();
+                }, 500); 
+            },
             async cargarLotes() {
                 try {
-                    const response = await fetch(`/api/lotes?pagina=${this.paginaActual}`);
+                    let url = `/api/lotes?pagina=${this.paginaActual}`;
+                    if (this.textoBusqueda) {
+                        const valor = this.textoBusqueda.trim();
+
+                        if (!isNaN(valor) && valor !== "") {
+                            url += `&numeroLote=${encodeURIComponent(valor)}`;
+                        } else {
+                            url += `&marca=${encodeURIComponent(valor)}`;
+                        }
+                    }
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar');
                     const data = await response.json();
                     

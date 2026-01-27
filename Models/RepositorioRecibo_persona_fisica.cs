@@ -51,7 +51,7 @@ namespace gestion_lotes.Models
         }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {
-            return _context.Recibo_persona_fisica.Find(id);
+            return await _context.Recibo_persona_fisica.FindAsync(id);
         }
         public async Task<bool> ExisteReciboEnLote(int id)
         {

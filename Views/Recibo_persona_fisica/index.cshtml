@@ -1816,7 +1816,7 @@
                         }
                     }
                     const response = await fetch(url);
-                    if (!response.ok) throw new Error('Error al cargar');
+                    if (!response.ok) throw new Error('Error al cargar los recibos');
                     const data = await response.json();
                     
                     this.recibos = data.recibos; 

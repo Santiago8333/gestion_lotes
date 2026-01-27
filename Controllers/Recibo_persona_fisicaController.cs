@@ -35,13 +35,15 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1, string? apellido
 {
     int registrosPorPagina = 5;
 
-    var consultaRecibo = repo.ObtenerTodosyFormasPagosyLotes(apellido,numeroLote).OrderBy(u => u.fecha_creacion);
-    var totalDeRegistros = await consultaRecibo.CountAsync();
+    var queryBase = repo.ObtenerTodosyFormasPagosyLotes(apellido, numeroLote);
 
-    var reciboPaginados = await consultaRecibo
-                                    .Skip((pagina - 1) * registrosPorPagina)
-                                    .Take(registrosPorPagina)
-                                    .ToListAsync();
+    var totalDeRegistros = await queryBase.CountAsync();
+
+    var reciboPaginados = await queryBase
+                                .OrderBy(u => u.fecha_creacion)
+                                .Skip((pagina - 1) * registrosPorPagina)
+                                .Take(registrosPorPagina)
+                                .ToListAsync();
 
     var resultado = new
     {

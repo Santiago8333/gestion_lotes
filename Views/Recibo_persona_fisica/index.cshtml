@@ -5,10 +5,18 @@
     <div class="row">
         <div class="col-md-12 history bg-light border-right">
             <h1>Recibo Persona Fisica</h1>
-            <div class="input-group mb-2">
-                <input type="text" 
-                       class="form-control" 
-                       placeholder="filtrar por apellido y numero de lote"> 
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="busqueda" class="form-label">Buscar Recibos</label>
+                    <input 
+                        type="text" 
+                        id="busqueda"
+                        class="form-control" 
+                        placeholder="Escribe un apellido o número de lote..."
+                        v-model="textoBusqueda"
+                        v-on:input="buscarConRetraso"
+                        >
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
@@ -1373,6 +1381,8 @@
                 porcentajeLoteModificar: 30,
                 precioSubastadoDetalle: 0,
                 porcentajeLoteDetalle: 30,
+                textoBusqueda: '',
+                timerBusqueda: null,
                 pagos: {
                 gobierno: { 
                     efectivo: 0, transferencia: 0, 
@@ -1546,6 +1556,14 @@
     faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; }
     },
         methods: {
+            buscarConRetraso() {
+                if (this.timerBusqueda) clearTimeout(this.timerBusqueda);
+                
+                this.timerBusqueda = setTimeout(() => {
+                    this.paginaActual = 1; 
+                    this.cargarRecibo();
+                }, 500); 
+            },
             async buscarLote() {
                     if (!this.busquedaLote) return;
                     
@@ -1784,10 +1802,20 @@
                 this.mostrarToast(error.message);
             }
         },
-            async cargarRecibo() {
+        async cargarRecibo() {
                 try {
                     
-                    const response = await fetch(`/api/recibof?pagina=${this.paginaActual}`);
+                    let url = `/api/recibof?pagina=${this.paginaActual}`;
+                    if (this.textoBusqueda) {
+                        const valor = this.textoBusqueda.trim();
+
+                        if (!isNaN(valor) && valor !== "") {
+                            url += `&numeroLote=${encodeURIComponent(valor)}`;
+                        } else {
+                            url += `&apellido=${encodeURIComponent(valor)}`;
+                        }
+                    }
+                    const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar');
                     const data = await response.json();
                     

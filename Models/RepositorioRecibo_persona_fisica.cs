@@ -29,24 +29,25 @@ namespace gestion_lotes.Models
         {
             return _context.Recibo_persona_fisica;
         }
-        public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null)
+       public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null, string? numeroLote = null)
         {
             var query = _context.Recibo_persona_fisica
-            .Include(r => r.FormasDePago)
-            .Include(r => r.Lote)
-            .AsQueryable(); 
+                .AsNoTracking()
+                .Include(r => r.FormasDePago)
+                .Include(r => r.Lote)
+                .AsQueryable();
+
             if (!string.IsNullOrEmpty(apellido))
             {
-                query = query.Where(r => r.apellido.Contains(apellido));
+                query = query.Where(r => r.apellido.Contains(apellido.Trim()));
             }
 
             if (!string.IsNullOrEmpty(numeroLote))
             {
-                query = query.Where(r => r.Lote != null && r.Lote.n_lote.ToString().Contains(numeroLote));
+                query = query.Where(r => r.Lote != null && r.Lote.n_lote.ToString().Contains(numeroLote.Trim()));
             }
 
-        
-        return query;
+            return query;
         }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)
         {

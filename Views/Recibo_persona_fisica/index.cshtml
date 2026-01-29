@@ -1,6 +1,7 @@
 @{
     ViewData["Title"] = "Recibo Persona Fisica";
 }
+<link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
 <div id="app" class="container mt-5" style="padding-top: 10px;">
     <div class="row">
         <div class="col-md-12 history bg-light border-right">
@@ -73,6 +74,11 @@
                                         <li>
                                             <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalDetalle(recibo)">
                                                 <i class="fa-solid fa-book"></i> Detalle
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="imprimirRecibo(recibo)">
+                                                <i class="fa-solid fa-print"></i> Imprimir
                                             </a>
                                         </li>
                                         <li>
@@ -1556,6 +1562,83 @@
     faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; }
     },
         methods: {
+            imprimirRecibo(recibo) {
+                    // 1. Construimos el HTML de las dos tablas
+                    const contenidoHtml = `
+                        <div id="impresion-recibo">
+                            <div style="text-align: center; margin-bottom: 20px;">
+                                <h2 style="margin: 0;">RECIBO DE SUBASTA</h2>
+                                <p style="margin: 5px 0;">Comprobante oficial de adjudicación</p>
+                                <hr>
+                            </div>
+
+                            <h3 style="font-family: sans-serif; color: #2c3e50; border-bottom: 1px solid #eee;">Datos del Comprador</h3>
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-family: sans-serif;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Nombre</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Apellido</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Provincia</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Tipo de Dni</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Dni</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Telefono</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Codigo Postal</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Email</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Domicilio</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Precio Subasta</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.nombre}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.apellido}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.provincia}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.tipo_dni}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.dni}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.telefono}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.codigo_postal}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.email}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.domicilio}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.precio_subastado}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h3 style="font-family: sans-serif; color: #2c3e50; border-bottom: 1px solid #eee;">Detalle del Lote</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">N° Lote</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Marca</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Modelo</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Dominio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.n_lote}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.marca}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.modelo}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.dominio}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div style="margin-top: 30px; text-align: right; font-family: sans-serif;">
+                                <p><strong>Firma y Sello</strong></p>
+                                <br><br>
+                                <p>_______________________</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // 2. Ejecutamos Print.js con el HTML crudo
+                    printJS({
+                        printable: contenidoHtml,
+                        type: 'raw-html',
+                        scanStyles: false // Para que use los estilos inline que pusimos arriba
+                    });
+                },
             buscarConRetraso() {
                 if (this.timerBusqueda) clearTimeout(this.timerBusqueda);
                 
@@ -2063,4 +2146,5 @@
     const app = Vue.createApp(appConfig);
     window.appInstance = app.mount('#app');
 </script>
+<script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
 }

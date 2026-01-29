@@ -1563,7 +1563,15 @@
     },
         methods: {
             imprimirRecibo(recibo) {
-                    // 1. Construimos el HTML de las dos tablas
+                //calcular pago lote
+                let precio = parseFloat(recibo.precio_subastado) || 0;
+                let porcentaje = parseFloat(recibo.pago_lote) || 0;
+                recibo.pago_lotee =  precio * (porcentaje / 100);
+                //calcular honorarios
+                recibo.honorarios = precio * 0.10;
+                //caclular sellado
+                recibo.sellado =  precio * 0.006;
+
                     const contenidoHtml = `
                         <div id="impresion-recibo">
                             <div style="text-align: center; margin-bottom: 20px;">
@@ -1571,7 +1579,25 @@
                                 <p style="margin: 5px 0;">Comprobante oficial de adjudicación</p>
                                 <hr>
                             </div>
-
+                            <h3 style="font-family: sans-serif; color: #2c3e50; border-bottom: 1px solid #eee;">Datos del Recibo</h3>
+                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-family: sans-serif;">
+                                <thead>
+                                    <tr style="background-color: #f8f9fa;">
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">% Pago Lote</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Pago Lote ($)</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Honorarios CMCPSL (10%)</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sellado DPIP (0.6%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">% ${recibo.pago_lote}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.pago_lotee}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.honorarios}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.sellado}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                             <h3 style="font-family: sans-serif; color: #2c3e50; border-bottom: 1px solid #eee;">Datos del Comprador</h3>
                             <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-family: sans-serif;">
                                 <thead>
@@ -1585,7 +1611,6 @@
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Codigo Postal</th>
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Email</th>
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Domicilio</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Precio Subasta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1594,12 +1619,11 @@
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.apellido}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.provincia}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.tipo_dni}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.dni}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.telefono}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.codigo_postal}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.email}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.domicilio}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$${recibo.precio_subastado}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.dni}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.telefono}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.codigo_postal}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.email}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.domicilio}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1612,6 +1636,9 @@
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Marca</th>
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Modelo</th>
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Dominio</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Año</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Base</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Precio Subastado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1620,11 +1647,48 @@
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.marca}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.modelo}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.dominio}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${recibo.lote.anio}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.lote.base}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.precio_subastado}</td>
                                     </tr>
                                 </tbody>
                             </table>
-                            
-                            <div style="margin-top: 30px; text-align: right; font-family: sans-serif;">
+                            <h3 style="font-family: sans-serif; color: #2c3e50; border-bottom: 1px solid #eee;">Formas de Pago</h3>
+                            <table style="width: 100%; border-collapse: collapse; font-family: sans-serif; margin-top: 10px;">
+                            <thead>
+                                <tr style="background-color: #f8f9fa;">
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Destinatario</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Efectivo</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Transferencia</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Dólares (Monto / Cot.)</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Euros (Monto / Cot.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${recibo.formasDePago.map(pago => `
+                                    <tr>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${pago.destinatario}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                            $ ${pago.efectivo}
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                            $ ${pago.transferencia}
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                            ${pago.dolar_monto > 0 
+                                                ? `US$ ${pago.dolar_monto} (x ${pago.dolar_cotizacion})` 
+                                                : '-'}
+                                        </td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">
+                                            ${pago.euro_monto > 0 
+                                                ? `€ ${pago.euro_monto} (x ${pago.euro_cotizacion})` 
+                                                : '-'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                            <div style="margin-top: 30px; text-align: center; font-family: sans-serif;">
                                 <p><strong>Firma y Sello</strong></p>
                                 <br><br>
                                 <p>_______________________</p>

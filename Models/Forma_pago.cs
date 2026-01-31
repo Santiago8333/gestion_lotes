@@ -5,9 +5,12 @@ public class Forma_Pagos
 {
     [Key]
     public int id_forma_pago { get; set; }
-    public int id_recibo_persona_fisica { get; set; }
+    public int? id_recibo_persona_fisica { get; set; }
+    public int? id_recibo_persona_juridica { get; set; }
     [ForeignKey("id_recibo_persona_fisica")]
     public virtual Recibo_persona_fisica? Recibo_persona_fisica { get; set; }
+    [ForeignKey("id_recibo_persona_juridica")]
+    public virtual Recibo_persona_juridica? Recibo_persona_juridica { get; set; }
     public string destinatario { get; set; } = "";
     public decimal efectivo { get; set; }
     public decimal transferencia { get; set; }

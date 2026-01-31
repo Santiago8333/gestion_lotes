@@ -66,7 +66,7 @@ namespace gestion_lotes.Models
             .Where(fp => _context.Recibo_persona_fisica
                 .Where(r => r.id_lote == idLote)
                 .Select(r => r.id_recibo_persona_fisica)
-                .Contains(fp.id_recibo_persona_fisica))
+                .Contains(fp.id_recibo_persona_fisica ?? 0))
             .ExecuteDeleteAsync();
 
            await _context.Recibo_persona_fisica

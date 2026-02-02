@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Recibo Persona Juridica";
+}
+<link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
+<div id="app" class="container mt-5" style="padding-top: 10px;">
+    <div class="row">
+        <div class="col-md-12 history bg-light border-right">
+            <h1>Recibo Persona Juridica</h1>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="busqueda" class="form-label">Buscar Recibos</label>
+                    <input 
+                        type="text" 
+                        id="busqueda"
+                        class="form-control" 
+                        placeholder="Escribe un apellido o número de lote..."
+                        v-model="textoBusqueda"
+                        v-on:input="buscarConRetraso"
+                        >
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre</th>
+                            <th scope="col">Apellido</th>
+                            <th scope="col">Tipo Dni</th>
+                            <th scope="col">Dni</th>
+                            <th scope="col">Telefono</th>
+                            <th scope="col">Codigo Postal</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Domicilio</th>
+                            <th scope="col">Provincia</th>
+                            <th scope="col">Precio Subastado</th>
+                            <th scope="col">Fecha de Creación</th>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                            <th scope="col">Creado Por</th>
+                            }
+                            <th scope="col">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(recibo, index) in recibos" :key="recibo.id_recibo_persona_fisica">
+                            <td>{{ recibo.index }}</td>
+                            <td>{{ recibo.nombre }}</td>
+                            <td>{{ recibo.apellido }}</td>
+                            <td>{{ recibo.tipo_dni }}</td>
+                            <td>{{ recibo.dni }}</td>
+                            <td>{{ recibo.telefono }}</td>
+                            <td>{{ recibo.codigo_postal }}</td>
+                            <td>{{ recibo.email }}</td>
+                            <td>{{ recibo.domicilio }}</td>
+                            <td>{{ recibo.provincia }}</td>
+                            <td>{{ recibo.precio_subastado }}</td>
+                            <td>{{ formatearFecha(recibo.fecha_creacion) }}</td>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <td>{{ recibo.creado_por }}</td>
+                            }
+                            <td>
+                                <div class="dropdown position-static">
+                                    <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(recibo)">
+                                                <i class="fa-solid fa-pencil"></i> Modificar
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalDetalle(recibo)">
+                                                <i class="fa-solid fa-book"></i> Detalle
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="imprimirRecibo(recibo)">
+                                                <i class="fa-solid fa-print"></i> Imprimir
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalEliminar(recibo)">
+                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr v-if="recibos.length === 0">
+                            <td colspan="13" class="text-center text-muted">No hay recibos cargados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+             <button type="button" class="btn btn-primary agregar" data-bs-toggle="modal" data-bs-target="#agregarModal"><i class="fa-solid fa-plus"></i></button>
+        </div>
+    </div>
+
+    <nav aria-label="Page navigation" v-if="totalPaginas > 1">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" :class="{ disabled: paginaActual === 1 }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(paginaActual - 1)">Anterior</a>
+            </li>
+            <li class="page-item" v-for="pagina in totalPaginas" :key="pagina" :class="{ active: pagina === paginaActual }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(pagina)">{{ pagina }}</a>
+            </li>
+            <li class="page-item" :class="{ disabled: paginaActual === totalPaginas }">
+                <a class="page-link" href="#" v-on:click.prevent="cambiarPagina(paginaActual + 1)">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+@section Scripts {
+<script>
+    const appConfig = {
+        data() {
+            return {
+                recibos: [],
+                paginaActual: 1,
+                totalPaginas: 0,
+                busquedaLote: '',
+                loteSeleccionado: null,
+                errorBusqueda: null,
+                cargando: false,
+                resultadosBusqueda: [],
+                
+            };
+        },
+    mounted() {
+            this.cargarRecibo();
+            
+        },
+    computed: {
+       
+        },
+    methods: {
+        async cargarRecibo() {
+                try {
+                    
+                    let url = `/api/reciboj?pagina=${this.paginaActual}`;
+                    if (this.textoBusqueda) {
+                        const valor = this.textoBusqueda.trim();
+
+                        if (!isNaN(valor) && valor !== "") {
+                            url += `&numeroLote=${encodeURIComponent(valor)}`;
+                        } else {
+                            url += `&razonSocial=${encodeURIComponent(valor)}`;
+                        }
+                    }
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Error al cargar los recibos');
+                    const data = await response.json();
+                    
+                    this.recibos = data.recibos; 
+                    this.totalPaginas = data.totalPaginas;
+                    this.paginaActual = data.paginaActual;
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+         }
+           
+    };
+
+    const app = Vue.createApp(appConfig);
+    window.appInstance = app.mount('#app');
+}
+</script>
+<script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+}

@@ -20,6 +20,7 @@ namespace gestion_lotes.Models
         public DbSet<Lotes> Lotes { get; set; }
         public DbSet<Recibo_persona_fisica> Recibo_persona_fisica { get; set; }
         public DbSet<Forma_Pagos> Forma_Pagos { get; set; }
+        public DbSet<Recibo_persona_juridica> Recibo_persona_juridica { get; set; }
         // Opcional: Puedes agregar configuraciones adicionales aquí si es necesario
         // protected override void OnModelCreating(ModelBuilder modelBuilder)
         // {

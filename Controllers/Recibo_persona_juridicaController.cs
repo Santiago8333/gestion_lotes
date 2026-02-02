@@ -17,9 +17,11 @@ public class Recibo_persona_juridicaController : Controller
 {
     private readonly IConfiguration config;
     private readonly IWebHostEnvironment _environment;
+    private readonly IRecibo_persona_juridicaRepositorio repo;
 
-    public Recibo_persona_juridicaController(IConfiguration config, IWebHostEnvironment environment)
+    public Recibo_persona_juridicaController(IRecibo_persona_juridicaRepositorio repositorio,IConfiguration config, IWebHostEnvironment environment)
     {
+         this.repo = repositorio;
         this.config = config;
         _environment = environment;
 
@@ -27,5 +29,30 @@ public class Recibo_persona_juridicaController : Controller
 public IActionResult Index()
 {
     return View(); 
+}
+[HttpGet]
+[Route("api/reciboj")]
+public async Task<IActionResult> ObtenerReciboF(int pagina = 1, string? razon_social = null, string? numeroLote = null)
+{
+    int registrosPorPagina = 5;
+
+    var queryBase = repo.ObtenerTodosyFormasPagosyLotes(razon_social, numeroLote);
+
+    var totalDeRegistros = await queryBase.CountAsync();
+
+    var reciboPaginados = await queryBase
+                                .OrderBy(u => u.fecha_creacion)
+                                .Skip((pagina - 1) * registrosPorPagina)
+                                .Take(registrosPorPagina)
+                                .ToListAsync();
+
+    var resultado = new
+    {
+        PaginaActual = pagina,
+        TotalPaginas = (int)Math.Ceiling((double)totalDeRegistros / registrosPorPagina),
+        Recibos = reciboPaginados
+    };
+
+    return Ok(resultado);
 }
 }

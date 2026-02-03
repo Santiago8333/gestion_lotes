@@ -55,8 +55,8 @@ namespace gestion_lotes.Models
         }
         public async Task<bool> ExisteReciboEnLote(int id)
         {
-            return await _context.Recibo_persona_fisica
-                .AnyAsync(r => r.id_lote == id);
+            return await _context.Recibo_persona_fisica.AnyAsync(r => r.id_lote == id) 
+                || await _context.Recibo_persona_juridica.AnyAsync(r => r.id_lote == id);
         }
         public async Task<Recibo_persona_fisica> Agregar(Recibo_persona_fisica recibo)
         {

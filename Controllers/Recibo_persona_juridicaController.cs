@@ -55,4 +55,35 @@ public async Task<IActionResult> ObtenerReciboF(int pagina = 1, string? razon_so
 
     return Ok(resultado);
 }
+[HttpPost]
+[Route("/api/recibosj")]
+public async Task<IActionResult> Agregar([FromBody] CrearReciboRequestJuridica datos)
+{
+    ModelState.Remove("creado_por");
+    ModelState.Remove("fecha_creacion");
+     if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+
+    try
+    {
+        bool LoteExiste = await repo.ExisteReciboEnLote(datos.id_lote);
+
+        if (LoteExiste)
+        {
+            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
+        }
+        string usuario = User.Identity?.Name ?? "Sistema";
+        var recibo = await repo.CrearReciboConPagos(datos,usuario);
+        
+        return Ok(new { mensaje = "Recibo agregado"});
+    }
+    catch (Exception ex)
+    {
+         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

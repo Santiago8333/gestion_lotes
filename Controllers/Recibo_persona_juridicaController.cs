@@ -86,4 +86,26 @@ public async Task<IActionResult> Agregar([FromBody] CrearReciboRequestJuridica d
          return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
+[HttpDelete]
+[Route("api/recibosj/{id}")]
+public async Task<IActionResult> EliminarRecibo(int id)
+{
+    try
+    {
+
+        var recibo = await repo.ObtenerPorId(id);
+        if (recibo == null)
+        {
+            return NotFound(new { mensaje = "El recibo no fue encontrado." });
+        }
+        
+        await repo.EliminarDirecto(id);
+
+        return Ok(new { mensaje = "recibo eliminado exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el recibo."+ex });
+    }
+}
 }

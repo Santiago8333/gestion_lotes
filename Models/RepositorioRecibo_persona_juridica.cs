@@ -12,6 +12,8 @@ public interface IRecibo_persona_juridicaRepositorio
         IQueryable<Recibo_persona_juridica> ObtenerTodosyFormasPagosyLotes(string? razon_social = null, string? numeroLote = null);
         Task<Recibo_persona_juridica> CrearReciboConPagos(CrearReciboRequestJuridica request, string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
+        Task<int> EliminarDirecto(int id);
+        Task<Recibo_persona_juridica?> ObtenerPorId(int id);
     }
 
 public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaRepositorio
@@ -127,6 +129,34 @@ public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaReposi
         {
             return await _context.Recibo_persona_fisica.AnyAsync(r => r.id_lote == id) 
                 || await _context.Recibo_persona_juridica.AnyAsync(r => r.id_lote == id);
+        }
+        public async Task<int> EliminarDirecto(int id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
+            try
+            {
+                await _context.Forma_Pagos
+                    .Where(f => f.id_recibo_persona_juridica == id)
+                    .ExecuteDeleteAsync();
+
+                int filasAfectadas = await _context.Recibo_persona_juridica
+                    .Where(u => u.id_recibo_persona_juridica == id)
+                    .ExecuteDeleteAsync();
+
+                await transaction.CommitAsync();
+                
+                return filasAfectadas;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        public async Task<Recibo_persona_juridica?> ObtenerPorId(int id)
+        {
+            return await _context.Recibo_persona_juridica.FindAsync(id);
         }
     }
 }

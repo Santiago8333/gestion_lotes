@@ -108,4 +108,29 @@ public async Task<IActionResult> EliminarRecibo(int id)
         return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar eliminar el recibo."+ex });
     }
 }
+[HttpGet]
+[Route("api/recibodetallej")]
+public async Task<IActionResult> ObtenerReciboJ(int pagina = 1, string? razon_social = null, string? numeroLote = null)
+{
+    int registrosPorPagina = 5;
+
+    var queryBase = repo.ObtenerTodosyFormasPagosyLotes(razon_social, numeroLote);
+
+    var totalDeRegistros = await queryBase.CountAsync();
+
+    var reciboPaginados = await queryBase
+                                .OrderBy(u => u.fecha_creacion)
+                                .Skip((pagina - 1) * registrosPorPagina)
+                                .Take(registrosPorPagina)
+                                .ToListAsync();
+
+    var resultado = new
+    {
+        PaginaActual = pagina,
+        TotalPaginas = (int)Math.Ceiling((double)totalDeRegistros / registrosPorPagina),
+        Recibos = reciboPaginados
+    };
+
+    return Ok(resultado);
+}
 }

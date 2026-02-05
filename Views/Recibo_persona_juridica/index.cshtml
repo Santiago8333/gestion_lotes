@@ -72,7 +72,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="">
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalDetalle(recibo)">
                                                 <i class="fa-solid fa-book"></i> Detalle
                                             </a>
                                         </li>
@@ -525,7 +525,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-                <label for="tipo" class="form-label">Tipo Dni</label>
+                <label for="tipo" class="form-label">Tipo</label>
                 <input type="text" class="form-control" id="tipo" name="tipo" value="CUIT" required>
                 <div class="invalid-feedback">El Tipo Dni es obligatorio.</div>
             </div>
@@ -575,6 +575,337 @@
   </div>
 </div>
 
+ <!-- Modal detalle-->
+<div class="modal fade" id="confirmDetalleModal" tabindex="-1" aria-labelledby="confirmDetalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDetalleModalLabel">Detalle del Recibo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" v-if="reciboADetalle">
+        @if (User.IsInRole("Administrador"))
+                            {
+                <h2 class="text-secondary">Recibo info</h2>
+                    <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                        <div>
+                            <strong>ID: {{ reciboADetalle.id_recibo_persona_juridica }}</strong><br>
+                            <small>
+                                    <span class="text-danger fw-bold">Creado Por: {{ reciboADetalle.creado_por }}</span>
+                                
+                        </div>
+                        
+                    </div>
+        }
+            <div v-if="reciboADetalle.lote">
+                <h2 class="text-secondary">Lote que tiene el Recibo</h2>
+                <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                    <div>
+                        <strong>Lote N°: {{ reciboADetalle.lote.n_lote }}</strong><br>
+                        <small>@if (User.IsInRole("Administrador"))
+                            {
+                                <span class="text-danger fw-bold">ID: {{ reciboADetalle.lote.id_lote }}</span> <span>|</span> <span class="text-danger fw-bold">Creado Por: {{ reciboADetalle.lote.creado_por }}</span>
+                            }
+                            Base: ${{ reciboADetalle.lote.base }} | Marca: {{ reciboADetalle.lote.marca }} | Modelo: {{ reciboADetalle.lote.modelo }} | Dominio: {{ reciboADetalle.lote.dominio }} | Anio: {{ reciboADetalle.lote.anio }} | Base: {{ reciboADetalle.lote.base }} | Fecha de Creacion: {{ formatearFecha(reciboADetalle.lote.fecha_creacion) }} </small>
+                    </div>
+                    
+                </div>
+
+                <div class="mb-2">
+                    <label for="precio_subastado" class="form-label fw-bold text-primary">Precio Final Subastado</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" 
+                               class="form-control form-control-sm bg-white" 
+                               id="precio_subastado" 
+                               name="precio_subastado" 
+                               v-model="precioSubastadoDetalle"
+                               step="0.01"
+                               readonly> 
+                    </div>
+                </div>
+
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">% Pago Lote</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" 
+                           class="form-control form-control-sm bg-white" 
+                           id="pago_lote"
+                           name="pago_lote"
+                           v-model.number="porcentajeLoteDetalle" 
+                           min="0" max="100" readonly>
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Pago Lote ($)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoPagoLoteDetalle.toFixed(2)" 
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoHonorariosDetalle.toFixed(2)"
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoSelladoDetalle.toFixed(2)"
+                       readonly>
+            </div>
+        </div>
+
+
+        <div class="row g-3">
+            
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">Total a Pagar AHORA</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white border-primary">$</span>
+                    <input type="text" 
+                           class="form-control fw-bold text-primary border-primary bg-white" 
+                           :value="totalPagarAhoraDetalle.toFixed(2)" 
+                           readonly>
+                </div>
+                <small class="text-muted fst-italic">Suma: Pago Lote + Honorarios + Sellado</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-danger">Saldo Lote a Pagar (en 48hs)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-danger text-white border-danger">$</span>
+                    <input type="text" 
+                           class="form-control fw-bold text-danger border-danger bg-white" 
+                           :value="saldoRestanteDetalle.toFixed(2)" 
+                           readonly>
+                </div>
+                <small class="text-muted fst-italic">Resto del valor del lote</small>
+            </div>
+
+        </div>
+
+
+<ul class="nav nav-tabs mb-3 mt-4" id="pagoTabsDet" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="gobierno-tab-det" data-bs-toggle="tab" data-bs-target="#gobierno-det" type="button" role="tab">Gob. San Luis</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="cmcpsl-tab-det" data-bs-toggle="tab" data-bs-target="#cmcpsl-det" type="button" role="tab">CMCPSL</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="dpip-tab-det" data-bs-toggle="tab" data-bs-target="#dpip-det" type="button" role="tab">DPIP</button>
+    </li>
+</ul>
+
+
+<div class="tab-content" id="pagoTabsContentDet">
+
+    <div class="tab-pane fade show active" id="gobierno-det" role="tabpanel">
+        <div class="alert alert-light border p-3">
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.efectivo" readonly>
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.transferencia" readonly>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.dolar_monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.dolar_cotizacion" readonly>
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.euro_monto" placeholder="Monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.gobierno.euro_cotizacion" placeholder="Valor toma" readonly>
+                    </div>
+                </div>
+            </div>
+
+            </div>
+    </div>
+
+    <div class="tab-pane fade" id="cmcpsl-det" role="tabpanel">
+        <div class="alert alert-light border p-3">
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.efectivo" readonly>
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.transferencia" readonly>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+             <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.dolar_monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.dolar_cotizacion" readonly>
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.euro_monto" placeholder="Monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.cmcpsl.euro_cotizacion" placeholder="Valor toma" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="dpip-det" role="tabpanel">
+        <div class="alert alert-light border p-3">
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.efectivo" readonly>
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.transferencia" readonly>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+             <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.dolar_monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.dolar_cotizacion" readonly>
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.euro_monto" placeholder="Monto" readonly>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control form-control-sm bg-white" v-model="pagosDetalle.dpip.euro_cotizacion" placeholder="Valor toma" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label for="razon_social" class="form-label">Razon Social</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="razon_social" name="razon_social" v-model="reciboADetalle.razon_social" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="apoderado_socio" class="form-label">Apoderado Socio</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="apellido" name="apoderado_socio" v-model="reciboADetalle.apoderado_socio" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="tipo" name="tipo" value="Dni" v-model="reciboADetalle.tipo" readonly>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="numero" class="form-label">Numero de Dni o Cuit</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="numero" name="numero" v-model="reciboADetalle.numero" readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control form-control-sm bg-white" id="email" name="email" v-model="reciboADetalle.email" readonly>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control form-control-sm bg-white" id="telefono" name="telefono" v-model="reciboADetalle.telefono" readonly>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="domicilio" name="domicilio" v-model="reciboADetalle.domicilio" readonly>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="codigo_postal" class="form-label">C.P.</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="codigo_postal" name="codigo_postal" v-model="reciboADetalle.codigo_postal" readonly>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="provincia" class="form-label">Provincia</label>
+                <input type="text" class="form-control form-control-sm bg-white" id="provincia" name="provincia" v-model="reciboADetalle.provincia" readonly>
+            </div>
+
+        </div> 
+
+
+            </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
@@ -587,6 +918,7 @@
     </div>
   </div>
 </div>
+
 <!-- Modal eliminar-->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -643,7 +975,18 @@
             modalAgregarBS: null,
             //eliminar recibo
             modalEliminarBS: null,
-            reciboAEliminar: null
+            reciboAEliminar: null,
+            //detalle recibo
+            modalDetalleBS: null,
+            toastBS: null,
+            precioSubastadoDetalle: 0,
+            porcentajeLoteDetalle: 30,
+            reciboADetalle: null,
+            pagosDetalle: {
+            gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+            cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+            dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
+            }
             };
         },
     mounted() {
@@ -655,8 +998,29 @@
             // Inicializar Modales de Bootstrap para poder abrirlos/cerrarlos desde JS
             this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            this.modalDetalleBS = new bootstrap.Modal(document.getElementById('confirmDetalleModal'));
         },
     computed: {
+        montoPagoLoteDetalle() {
+            let precio = parseFloat(this.precioSubastadoDetalle) || 0;
+            let porcentaje = parseFloat(this.porcentajeLoteDetalle) || 0;
+            return precio * (porcentaje / 100);
+        },
+        montoHonorariosDetalle() {
+            let precio = parseFloat(this.precioSubastadoDetalle) || 0;
+            return precio * 0.10;
+        },
+        montoSelladoDetalle() {
+            let precio = parseFloat(this.precioSubastadoDetalle) || 0;
+            return precio * 0.006;
+        },
+        totalPagarAhoraDetalle() {
+            return this.montoPagoLoteDetalle + this.montoHonorariosDetalle + this.montoSelladoDetalle;
+        },
+        saldoRestanteDetalle() {
+            let precio = parseFloat(this.precioSubastadoDetalle) || 0;
+            return precio - this.montoPagoLoteDetalle;
+        },
        montoPagoLote() {
             let precio = parseFloat(this.precioSubastado) || 0;
             let porcentaje = parseFloat(this.porcentajeLote) || 0;
@@ -715,6 +1079,37 @@
         }
         },
     methods: {
+        mostrarModalDetalle(recibo){
+                this.reciboADetalle = recibo;
+                this.precioSubastadoDetalle = recibo.precio_subastado;
+                this.porcentajeLoteDetalle = recibo.pago_lote;
+                this.pagosDetalle = {
+                    gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+                    cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+                    dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
+                };
+                if (recibo.formasDePago && Array.isArray(recibo.formasDePago)) {
+                    recibo.formasDePago.forEach(pago => {
+                    let entidad = '';
+                    if (pago.destinatario === 'Gobierno') entidad = 'gobierno';
+                    else if (pago.destinatario === 'Cmcpsl') entidad = 'cmcpsl';
+                    else if (pago.destinatario === 'Dpip') entidad = 'dpip';
+
+                    if (entidad) {
+                        this.pagosDetalle[entidad] = {
+                            efectivo: pago.efectivo,
+                            transferencia: pago.transferencia,
+                            dolar_monto: pago.dolar_monto,
+                            dolar_cotizacion: pago.dolar_cotizacion,
+                            euro_monto: pago.euro_monto,
+                            euro_cotizacion: pago.euro_cotizacion
+                        };
+                    }
+                });
+                }
+                console.log(recibo);
+                this.modalDetalleBS.show();
+            },
         seleccionarLote(lote) {
                     this.loteSeleccionado = lote;      
                     this.busquedaLote = lote.numero;   

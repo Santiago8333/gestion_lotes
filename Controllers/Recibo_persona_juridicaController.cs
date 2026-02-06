@@ -133,4 +133,39 @@ public async Task<IActionResult> ObtenerReciboJ(int pagina = 1, string? razon_so
 
     return Ok(resultado);
 }
+[HttpPut]
+[Route("/api/recibosjmd")]
+public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestJMd datos)
+{
+    ModelState.Remove("creado_por");
+    ModelState.Remove("fecha_creacion");
+     if (!ModelState.IsValid)
+    {
+        var errores = ModelState.Values.SelectMany(v => v.Errors)
+                                        .Select(e => e.ErrorMessage);
+        return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
+    }
+
+    try
+    {
+        bool loteDuplicado = await repo.ExisteLoteDuplicado(
+            datos.id_lote, 
+            idReciboFisicaExcluir: null, 
+            idReciboJuridicaExcluir: datos.id_recibo_persona_juridica
+        );
+
+        if (loteDuplicado)
+        {
+            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya está asignado a otro recibo físico o jurídico." });
+        }
+        string usuario = User.Identity?.Name ?? "Sistema";
+        var recibo = await repo.ModificarReciboConPagos(datos.id_recibo_persona_juridica,datos,usuario);
+        
+        return Ok(new { mensaje = "Recibo modificado"});
+    }
+    catch (Exception ex)
+    {
+         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
+    }
+}
 }

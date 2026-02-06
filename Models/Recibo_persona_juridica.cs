@@ -60,3 +60,20 @@ public class CrearReciboRequestJuridica
     public decimal pago_lote { get; set; }
     public List<Forma_Pagos> lista_pagos { get; set; } = new List<Forma_Pagos>();
 }
+public class CrearReciboRequestJMd
+{
+    public int id_lote { get; set; }
+    public int id_recibo_persona_juridica {get;set;}
+    public string razon_social {get;set;} = "";
+    public string apoderado_socio {get;set;} = "";
+    public string tipo {get;set;} = "";
+    public string numero {get;set;} = "";
+    public string telefono { get; set; } = "";
+    public string email { get; set; } = "";
+    public string domicilio { get; set; } = "";
+    public string codigo_postal { get; set; } = "";
+    public string provincia { get; set; } = "";
+    public decimal precio_subastado { get; set; }
+    public decimal pago_lote { get; set; }
+    public List<Forma_Pagos> lista_pagos { get; set; } = new List<Forma_Pagos>();
+}

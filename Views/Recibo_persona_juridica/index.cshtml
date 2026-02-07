@@ -905,6 +905,427 @@
 </div>
 
 
+<!-- Modal modificar-->
+<div class="modal fade" id="modificarModal" tabindex="-1" aria-labelledby="modificarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modificarModalLabel">Modificar Recibo</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form v-on:submit.prevent="modificarRecibo" id="formModificarRecibo" class="needs-validation" novalidate>
+        <div class="modal-body" v-if="reciboAModificar">
+            <input type="hidden" name="id_recibo_persona_juridica" v-model="reciboAModificar.id_recibo_persona_juridica" />
+            <div class="card mb-3 bg-light">
+                <div class="card-body">
+
+            <div v-if="reciboAModificar.lote">
+                <h2 class="text-secondary">Lote que tiene el Recibo</h2>
+                <div class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-2">
+                    <div>
+                        <strong>Lote N°: {{ reciboAModificar.lote.n_lote }}</strong><br>
+                        <small>Base: ${{ reciboAModificar.lote.base }} | Marca: {{ reciboAModificar.lote.marca }}</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" v-on:click="limpiarLoteModificar">Cambiar / Quitar</button>
+                </div>
+
+                <div class="mb-2">
+                    <label for="precio_subastado" class="form-label fw-bold text-primary">Precio Final Subastado</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" 
+                               class="form-control fw-bold" 
+                               id="precio_subastado" 
+                               name="precio_subastado" 
+                               v-model="precioSubastadoModificar"
+                               step="0.01"
+                               required> 
+                    </div>
+                </div>
+
+                <input type="hidden" name="id_lote" :value="reciboAModificar.lote.id_lote">
+            </div>
+
+
+            <div v-else>
+                    <h2 class="text-secondary">Buscar Nuevo Lote</h2>
+                    <label class="form-label fw-bold">Ingrese N° de Lote</label>
+            
+                    <div class="input-group mb-2">
+                        <input type="text" 
+                               class="form-control" 
+                               v-model="busquedaLoteModificar"
+                               v-on:keypress.enter.prevent="buscarLoteModificar"
+                               ref="inputBusqueda"> <button class="btn btn-primary" 
+                                type="button" 
+                                v-on:click="buscarLoteModificar" 
+                                :disabled="cargando">
+                            <span v-if="cargando" class="spinner-border spinner-border-sm"></span>
+                            <span v-else>Buscar</span>
+                        </button>
+                    </div>
+
+                    <div v-if="errorBusquedaModificar" class="text-danger small mb-2">
+                        {{ errorBusquedaModificar }}
+                    </div>
+
+                    <div v-if="resultadosBusquedaModificar.length > 0" class="list-group mb-3 shadow-sm">
+                        <button type="button" 
+                                class="list-group-item list-group-item-action list-group-item-primary"
+                                v-for="lote in resultadosBusquedaModificar" 
+                                :key="lote.id"
+                                v-on:click="seleccionarLoteModificar(lote)">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">Lote N° {{ lote.n_lote }}</h5>
+                                <small>${{ lote.base }}</small>
+                            </div>
+                            <small class="text-muted">Marca: {{ lote.marca }}</small>
+                        </button>
+                    </div>
+                    
+                    <div v-if="resultadosBusquedaModificar.length === 0 && busquedaLoteModificar !== '' && !cargandoModificar && busquedaRealizada" class="text-muted text-center mt-2">
+                        <small>No se encontraron lotes.</small>
+                    </div>
+                </div>
+
+        </div>
+    </div>
+
+    <div class="card bg-light border-0">
+        <div class="card-body">
+        <h5 class="mb-3 text-secondary"><i class="bi bi-calculator"></i> Liquidación Total</h5>
+        <div class="row g-3 mb-3">
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">% Pago Lote</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" 
+                           class="form-control" 
+                           id="pago_lote"
+                           name="pago_lote"
+                           v-model.number="porcentajeLoteModificar" 
+                           min="0" max="100">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label small fw-bold">Pago Lote ($)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoPagoLoteModificar.toFixed(2)" 
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoHonorariosModificar.toFixed(2)" 
+                       readonly>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
+                <input type="text" 
+                       class="form-control form-control-sm bg-white" 
+                       :value="montoSelladoModificar.toFixed(2)" 
+                       readonly>
+            </div>
+        </div>
+
+
+        <div class="row g-3">
+            
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-primary">Total a Pagar AHORA</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white border-primary">$</span>
+                    <input type="text" 
+                           class="form-control fw-bold text-primary border-primary bg-white" 
+                           :value="totalPagarAhoraModificar.toFixed(2)" 
+                           readonly>
+                </div>
+                <small class="text-muted fst-italic">Suma: Pago Lote + Honorarios + Sellado</small>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-danger">Saldo Lote a Pagar (en 48hs)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-danger text-white border-danger">$</span>
+                    <input type="text" 
+                           class="form-control fw-bold text-danger border-danger bg-white" 
+                           :value="saldoRestanteModificar.toFixed(2)" 
+                           readonly>
+                </div>
+                <small class="text-muted fst-italic">Resto del valor del lote</small>
+            </div>
+
+        </div>
+
+
+
+                </div>
+            </div>
+           
+
+
+<ul class="nav nav-tabs mb-3 mt-4" id="pagoTabsMod" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="gobierno-tab-mod" data-bs-toggle="tab" data-bs-target="#gobierno-mod" type="button" role="tab">Gob. San Luis</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="cmcpsl-tab-mod" data-bs-toggle="tab" data-bs-target="#cmcpsl-mod" type="button" role="tab">CMCPSL</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="dpip-tab-mod" data-bs-toggle="tab" data-bs-target="#dpip-mod" type="button" role="tab">DPIP</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="pagoTabsContentMod">
+
+    <div class="tab-pane fade show active" id="gobierno-mod" role="tabpanel">
+        <div class="alert alert-light border p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary m-0">Gobierno (Modificar)</h6>
+                <div class="badge p-2 fs-6" :class="faltaGobiernoMod > 0.5 ? 'bg-danger' : (faltaGobiernoMod < -0.5 ? 'bg-warning text-dark' : 'bg-success')">
+                    <span v-if="faltaGobiernoMod > 0.5">Falta: ${{ faltaGobiernoMod.toFixed(2) }}</span>
+                    <span v-else-if="faltaGobiernoMod < -0.5">Sobran: ${{ Math.abs(faltaGobiernoMod).toFixed(2) }}</span>
+                    <span v-else>Completo <i class="bi bi-check-circle"></i></span>
+                </div>
+            </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosGobiernoMod / (montoPagoLoteModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.gobierno.efectivo">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.gobierno.transferencia">
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.dolar_monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.dolar_cotizacion">
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.euro_monto" placeholder="Monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.gobierno.euro_cotizacion" placeholder="Valor toma">
+                    </div>
+                </div>
+            </div>
+
+            </div>
+    </div>
+
+    <div class="tab-pane fade" id="cmcpsl-mod" role="tabpanel">
+        <div class="alert alert-light border p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary m-0">CMCPSL (Modificar)</h6>
+                <div class="badge p-2 fs-6" :class="faltaCMCPSLMod > 0.5 ? 'bg-danger' : (faltaCMCPSLMod < -0.5 ? 'bg-warning text-dark' : 'bg-success')">
+                    <span v-if="faltaCMCPSLMod > 0.5">Falta: ${{ faltaCMCPSLMod.toFixed(2) }}</span>
+                    <span v-else>Completo</span>
+                </div>
+            </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosCMCPSLMod / (montoHonorariosModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.cmcpsl.efectivo">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.cmcpsl.transferencia">
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+             <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.dolar_monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.dolar_cotizacion">
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.euro_monto" placeholder="Monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.cmcpsl.euro_cotizacion" placeholder="Valor toma">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="dpip-mod" role="tabpanel">
+        <div class="alert alert-light border p-3">
+             <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary m-0">DPIP (Modificar)</h6>
+                <div class="badge p-2 fs-6" :class="faltaDPIPMod > 0.5 ? 'bg-danger' : (faltaDPIPMod < -0.5 ? 'bg-warning text-dark' : 'bg-success')">
+                    <span v-if="faltaDPIPMod > 0.5">Falta: ${{ faltaDPIPMod.toFixed(2) }}</span>
+                    <span v-else>Completo</span>
+                </div>
+            </div>
+            <div class="progress mb-3" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" 
+                     :style="{ width: Math.min((sumaPagosDPIPMod / (montoSelladoModificar || 1)) * 100, 100) + '%' }"
+                     :class="faltaDPIPMod > 0.5 ? 'bg-danger' : 'bg-success'"></div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="small fw-bold">Efectivo</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.dpip.efectivo">
+                </div>
+                <div class="col-6">
+                    <label class="small fw-bold">Transferencia</label>
+                    <input type="number" step="0.01" class="form-control form-control-sm" v-model="pagosModificar.dpip.transferencia">
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">us Dolares</label>
+             <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">$</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.dolar_monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.dolar_cotizacion">
+                    </div>
+                </div>
+            </div>
+            <label class="form-label small fw-bold mb-1">🇪🇺 Euros</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">€</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_monto" placeholder="Monto">
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text text-muted">Cotiz.</span>
+                        <input type="number" step="0.01" class="form-control" v-model="pagosModificar.dpip.euro_cotizacion" placeholder="Valor toma">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="modal-body">
+        <div class="row">
+            
+            <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" v-model="reciboAModificar.nombre" required>
+                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" v-model="reciboAModificar.apellido" required>
+                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="tipo_dni" class="form-label">Tipo Dni</label>
+                <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" v-model="reciboAModificar.tipo_dni" required>
+                <div class="invalid-feedback">El Tipo Dni es obligatorio.</div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="dni" class="form-label">Dni</label>
+                <input type="text" class="form-control" id="dni" name="dni" v-model="reciboAModificar.dni" required>
+                <div class="invalid-feedback">El Dni es obligatorio.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" v-model="reciboAModificar.email" required>
+                <div class="invalid-feedback">El Email es obligatorio.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="telefono" class="form-label">Telefono</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono" v-model="reciboAModificar.telefono" required>
+                <div class="invalid-feedback">El Telefono es obligatorio.</div>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label for="domicilio" class="form-label">Domicilio</label>
+                <input type="text" class="form-control" id="domicilio" name="domicilio" v-model="reciboAModificar.domicilio" required>
+                <div class="invalid-feedback">El Domicilio es obligatorio.</div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label for="codigo_postal" class="form-label">C.P.</label>
+                <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" v-model="reciboAModificar.codigo_postal" required>
+                <div class="invalid-feedback">El C.P. es obligatorio.</div>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label for="provincia" class="form-label">Provincia</label>
+                <input type="text" class="form-control" id="provincia" name="provincia" v-model="reciboAModificar.provincia" required>
+                <div class="invalid-feedback">El Provincia es obligatorio.</div>
+            </div>
+
+        </div> 
+        </div>
+
+
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -986,6 +1407,20 @@
             gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
             cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
             dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
+            },
+            //modificar recibo
+            precioSubastadoModificar: 0,
+            porcentajeLoteModificar: 30,
+            modalModificarBS: null,
+            busquedaLoteModificar: '',
+            cargandoModificar: false,
+            errorBusquedaModificar: null,
+            resultadosBusquedaModificar: [],
+            loteSeleccionadoModificar: null,
+            pagosModificar: {
+            gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+            cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+            dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
             }
             };
         },
@@ -999,8 +1434,55 @@
             this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
             this.modalDetalleBS = new bootstrap.Modal(document.getElementById('confirmDetalleModal'));
+            this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
         },
     computed: {
+        sumaPagosGobiernoMod() {
+        const p = this.pagosModificar.gobierno;
+        return (parseFloat(p.efectivo)||0) + (parseFloat(p.transferencia)||0) + 
+               ((parseFloat(p.dolar_monto)||0) * (parseFloat(p.dolar_cotizacion)||0)) + 
+               ((parseFloat(p.euro_monto)||0) * (parseFloat(p.euro_cotizacion)||0));
+        },
+        faltaGobiernoMod() { return this.montoPagoLoteModificar - this.sumaPagosGobiernoMod; },
+
+        sumaPagosCMCPSLMod() {
+            const p = this.pagosModificar.cmcpsl;
+            return (parseFloat(p.efectivo)||0) + (parseFloat(p.transferencia)||0) + 
+                ((parseFloat(p.dolar_monto)||0) * (parseFloat(p.dolar_cotizacion)||0)) + 
+                ((parseFloat(p.euro_monto)||0) * (parseFloat(p.euro_cotizacion)||0));
+        },
+        faltaCMCPSLMod() { return this.montoHonorariosModificar - this.sumaPagosCMCPSLMod; },
+
+        sumaPagosDPIPMod() {
+            const p = this.pagosModificar.dpip;
+            return (parseFloat(p.efectivo)||0) + (parseFloat(p.transferencia)||0) + 
+                ((parseFloat(p.dolar_monto)||0) * (parseFloat(p.dolar_cotizacion)||0)) + 
+                ((parseFloat(p.euro_monto)||0) * (parseFloat(p.euro_cotizacion)||0));
+        },
+        faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; }
+        },
+        montoPagoLoteModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            let porcentaje = parseFloat(this.porcentajeLoteModificar) || 0;
+            return precio * (porcentaje / 100);
+        },
+        montoHonorariosModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio * 0.10;
+        },
+        // 3. Calcula el 0.6% fijo de Sellado
+        montoSelladoModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio * 0.006;
+        },
+        totalPagarAhoraModificar() {
+            return this.montoPagoLoteModificar + this.montoHonorariosModificar + this.montoSelladoModificar;
+        },
+        // 5. Calcula lo que falta pagar del lote (Total - lo que pagó del lote)
+        saldoRestanteModificar() {
+            let precio = parseFloat(this.precioSubastadoModificar) || 0;
+            return precio - this.montoPagoLoteModificar;
+        },
         montoPagoLoteDetalle() {
             let precio = parseFloat(this.precioSubastadoDetalle) || 0;
             let porcentaje = parseFloat(this.porcentajeLoteDetalle) || 0;
@@ -1079,6 +1561,209 @@
         }
         },
     methods: {
+    async modificarRecibo() {
+            const form = document.getElementById('formModificarRecibo');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            form.classList.add('was-validated');
+            const formData = new FormData(form);
+            const datosPersonales = Object.fromEntries(formData.entries());
+            const listaPagosArray = [];
+            const limpiarNumero = (val) => parseFloat(val) || 0;
+            if (this.pagosModificar.gobierno) {
+                listaPagosArray.push({
+                destinatario: "Gobierno", // Agregamos el nombre manualmente
+                efectivo: limpiarNumero(this.pagosModificar.gobierno.efectivo),
+                transferencia: limpiarNumero(this.pagosModificar.gobierno.transferencia),
+                dolar_monto: limpiarNumero(this.pagosModificar.gobierno.dolar_monto),
+                dolar_cotizacion: limpiarNumero(this.pagosModificar.gobierno.dolar_cotizacion),
+                euro_monto: limpiarNumero(this.pagosModificar.gobierno.euro_monto),
+                euro_cotizacion: limpiarNumero(this.pagosModificar.gobierno.euro_cotizacion)
+            });
+        }
+
+        // B. Procesar CMCPSL
+        if (this.pagosModificar.cmcpsl) {
+            listaPagosArray.push({
+                destinatario: "Cmcpsl",
+                efectivo: limpiarNumero(this.pagosModificar.cmcpsl.efectivo),
+                transferencia: limpiarNumero(this.pagosModificar.cmcpsl.transferencia),
+                dolar_monto: limpiarNumero(this.pagosModificar.cmcpsl.dolar_monto),
+                dolar_cotizacion: limpiarNumero(this.pagosModificar.cmcpsl.dolar_cotizacion),
+                euro_monto: limpiarNumero(this.pagosModificar.cmcpsl.euro_monto),
+                euro_cotizacion: limpiarNumero(this.pagosModificar.cmcpsl.euro_cotizacion)
+            });
+        }
+
+        // C. Procesar DPIP
+        if (this.pagosModificar.dpip) {
+            listaPagosArray.push({
+                destinatario: "Dpip",
+                efectivo: limpiarNumero(this.pagosModificar.dpip.efectivo),
+                transferencia: limpiarNumero(this.pagosModificar.dpip.transferencia),
+                dolar_monto: limpiarNumero(this.pagosModificar.dpip.dolar_monto),
+                dolar_cotizacion: limpiarNumero(this.pagosModificar.dpip.dolar_cotizacion),
+                euro_monto: limpiarNumero(this.pagosModificar.dpip.euro_monto),
+                euro_cotizacion: limpiarNumero(this.pagosModificar.dpip.euro_cotizacion)
+            });
+        }
+        const TOLERANCIA = 1.00;
+        if (this.faltaCMCPSLMod > TOLERANCIA) {
+            this.mostrarToast(`Error: Falta completar el pago a CMCPSL. Restan: $${this.faltaCMCPSL.toFixed(2)}`);
+            console.warn("Bloqueado por falta de pago CMCPSL");
+            return;
+        }
+
+        // 2. Validar DPIP
+        if (this.faltaDPIPMod > TOLERANCIA) {
+            this.mostrarToast(`Error: Falta completar el pago a DPIP. Restan: $${this.faltaDPIP.toFixed(2)}`);
+            console.warn("Bloqueado por falta de pago DPIP");
+            return;
+        }
+
+        // 3. Validar Gobierno
+        if (this.faltaGobiernoMod > TOLERANCIA) {
+            this.mostrarToast(`Error: Falta completar el pago al Gobierno. Restan: $${this.faltaGobierno.toFixed(2)}`);
+            console.warn("Bloqueado por falta de pago Gobierno");
+            return;
+        }
+    const payload = {
+        // Datos de la persona (spread operator para sacar lo del form)
+        razon_social: datosPersonales.razon_social,
+        apoderado_socio: datosPersonales.apoderado_socio,
+        numero: datosPersonales.numero,
+        tipo: datosPersonales.tipo,
+        email: datosPersonales.email,
+        telefono: datosPersonales.telefono,
+        domicilio: datosPersonales.domicilio,
+        codigo_postal: datosPersonales.codigo_postal,
+        provincia: datosPersonales.provincia,
+        pago_lote: datosPersonales.pago_lote,
+
+        // Datos del recibo y lote
+        id_lote: this.loteSeleccionadoModificar?.id_lote || datosPersonales.id_lote,
+        precio_subastado: parseFloat(this.datosPersonales?.precio_subastado || this.precioSubastadoModificar),
+        id_recibo_persona_fisica: datosPersonales.id_recibo_persona_fisica,
+
+        lista_pagos: listaPagosArray
+    };
+            console.log("Modificando recibo:", payload);
+            
+                try {
+                // 2. Enviar la petición a la API
+                const response = await fetch(`/api/recibosjmd`, {
+                    method: 'PUT',
+                    headers: {
+                    'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                    
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.mensaje || 'Error al modificar el Recibo.');
+                }
+
+                
+                this.modalModificarBS.hide();
+                form.reset();
+                this.mostrarToast("Recibo modificado exitosamente");
+                this.cargarRecibo();
+                
+            } catch (error) {
+                console.error('Error al modificar Recibo:', error);
+                this.modalModificarBS.hide();
+                this.mostrarToast(error.message); 
+            }
+            
+            
+        },
+        mostrarModalModificar(recibo) {
+                console.log(recibo);
+                this.reciboAModificar = recibo;
+                this.precioSubastadoModificar = recibo.precio_subastado;
+                this.porcentajeLoteModificar = recibo.pago_lote;
+                this.pagosModificar = {
+                    gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+                    cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
+                    dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
+                };
+                if (recibo.formasDePago && Array.isArray(recibo.formasDePago)) {
+                    recibo.formasDePago.forEach(pago => {
+                    let entidad = '';
+                    if (pago.destinatario === 'Gobierno') entidad = 'gobierno';
+                    else if (pago.destinatario === 'Cmcpsl') entidad = 'cmcpsl';
+                    else if (pago.destinatario === 'Dpip') entidad = 'dpip';
+
+                    if (entidad) {
+                        this.pagosModificar[entidad] = {
+                            efectivo: pago.efectivo,
+                            transferencia: pago.transferencia,
+                            dolar_monto: pago.dolar_monto,
+                            dolar_cotizacion: pago.dolar_cotizacion,
+                            euro_monto: pago.euro_monto,
+                            euro_cotizacion: pago.euro_cotizacion
+                        };
+                    }
+                });
+            }
+                this.modalModificarBS.show();
+        },
+        async buscarLoteModificar() {
+            if (!this.busquedaLoteModificar) return;
+            
+            this.cargandoModificar = true;
+            this.errorBusquedaModificar = null;
+            this.resultadosBusquedaModificar = []; 
+            this.loteSeleccionadoModificar = null; 
+
+            try {
+                
+                const response = await fetch(`/api/buscar/lotes/${encodeURIComponent(this.busquedaLoteModificar)}`);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    
+                    if (Array.isArray(data)) {
+                        this.resultadosBusquedaModificar = data;
+                        
+                        if (data.length === 0) {
+                            this.errorBusquedaModificar = "No se encontraron coincidencias.";
+                        }
+                    } else {
+                        this.resultadosBusquedaModificar = [data];
+                    }
+
+                } else {
+                    if (response.status === 404) {
+                        this.errorBusquedaModificar = "No se encontró un lote con ese número.";
+                    } else {
+                        this.errorBusquedaModificar = "Error al buscar el lote.";
+                    }
+                }
+            } catch (error) {
+                console.error(error);
+                this.errorBusquedaModificar = "Error de conexión con el servidor.";
+            } finally {
+                this.cargandoModificar = false;
+            }
+        },
+        limpiarLoteModificar() {
+            this.reciboAModificar.lote = null;
+            this.reciboAModificar.id_lote = 0;
+            this.busquedaLoteModificar = '';
+            this.resultadosBusquedaModificar = [];
+        },
+        seleccionarLoteModificar(lote) {
+            this.reciboAModificar.lote = lote; 
+            this.resultadosBusquedaModificar = [];
+            this.busquedaLoteModificar = '';
+        },
         mostrarModalDetalle(recibo){
                 this.reciboADetalle = recibo;
                 this.precioSubastadoDetalle = recibo.precio_subastado;

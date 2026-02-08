@@ -67,7 +67,7 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="">
+                                            <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(recibo)">
                                                 <i class="fa-solid fa-pencil"></i> Modificar
                                             </a>
                                         </li>
@@ -861,7 +861,7 @@
             </div>
 
             <div class="col-md-4 mb-3">
-                <label for="tipo" class="form-label">Tipo</label>
+                <label for="tipo" class="form-label">Tipo Dni o Cuil</label>
                 <input type="text" class="form-control form-control-sm bg-white" id="tipo" name="tipo" value="Dni" v-model="reciboADetalle.tipo" readonly>
             </div>
             <div class="col-md-8 mb-3">
@@ -1263,25 +1263,25 @@
         <div class="row">
             
             <div class="col-md-6 mb-3">
-                <label for="nombre" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" v-model="reciboAModificar.nombre" required>
-                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+                <label for="razon_social" class="form-label">Razon Social</label>
+                <input type="text" class="form-control" id="razon_social" name="razon_social" v-model="reciboAModificar.razon_social" required>
+                <div class="invalid-feedback">El Razon Social es obligatorio.</div>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="apellido" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="apellido" name="apellido" v-model="reciboAModificar.apellido" required>
-                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+                <label for="apoderado_socio" class="form-label">Apoderado Socio</label>
+                <input type="text" class="form-control" id="apellido" name="apoderado_socio" v-model="reciboAModificar.apoderado_socio" required>
+                <div class="invalid-feedback">El Apoderado Socio es obligatorio.</div>
             </div>
 
             <div class="col-md-4 mb-3">
-                <label for="tipo_dni" class="form-label">Tipo Dni</label>
-                <input type="text" class="form-control" id="tipo_dni" name="tipo_dni" value="Dni" v-model="reciboAModificar.tipo_dni" required>
-                <div class="invalid-feedback">El Tipo Dni es obligatorio.</div>
+                <label for="tipo" class="form-label">Tipo Dni o Cuil</label>
+                <input type="text" class="form-control" id="tipo_dni" name="tipo" value="Dni" v-model="reciboAModificar.tipo" required>
+                <div class="invalid-feedback">El Tipo Dni o Cuil es obligatorio.</div>
             </div>
             <div class="col-md-8 mb-3">
-                <label for="dni" class="form-label">Dni</label>
-                <input type="text" class="form-control" id="dni" name="dni" v-model="reciboAModificar.dni" required>
-                <div class="invalid-feedback">El Dni es obligatorio.</div>
+                <label for="numero" class="form-label">Numero de Dni o Cuit</label>
+                <input type="text" class="form-control" id="numero" name="dni" v-model="reciboAModificar.numero" required>
+                <div class="invalid-feedback">El Numero de Dni o Cuit es obligatorio.</div>
             </div>
 
             <div class="col-md-6 mb-3">
@@ -1409,6 +1409,7 @@
             dpip:     { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 }
             },
             //modificar recibo
+            reciboAModificar: null,
             precioSubastadoModificar: 0,
             porcentajeLoteModificar: 30,
             modalModificarBS: null,
@@ -1459,8 +1460,7 @@
                 ((parseFloat(p.dolar_monto)||0) * (parseFloat(p.dolar_cotizacion)||0)) + 
                 ((parseFloat(p.euro_monto)||0) * (parseFloat(p.euro_cotizacion)||0));
         },
-        faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; }
-        },
+        faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; },
         montoPagoLoteModificar() {
             let precio = parseFloat(this.precioSubastadoModificar) || 0;
             let porcentaje = parseFloat(this.porcentajeLoteModificar) || 0;
@@ -1645,7 +1645,7 @@
         // Datos del recibo y lote
         id_lote: this.loteSeleccionadoModificar?.id_lote || datosPersonales.id_lote,
         precio_subastado: parseFloat(this.datosPersonales?.precio_subastado || this.precioSubastadoModificar),
-        id_recibo_persona_fisica: datosPersonales.id_recibo_persona_fisica,
+        id_recibo_persona_juridica: datosPersonales.id_recibo_persona_juridica,
 
         lista_pagos: listaPagosArray
     };
@@ -1711,7 +1711,12 @@
                     }
                 });
             }
-                this.modalModificarBS.show();
+            this.$nextTick(() => {
+                if (this.modalModificarBS) {
+                        this.modalModificarBS.show();
+                }
+            });
+                
         },
         async buscarLoteModificar() {
             if (!this.busquedaLoteModificar) return;

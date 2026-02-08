@@ -2033,7 +2033,7 @@
             },
             mostrarModalModificar(recibo) {
                 console.log(recibo);
-                this.reciboAModificar = recibo;
+                this.reciboAModificar = JSON.parse(JSON.stringify(recibo));
                 this.precioSubastadoModificar = recibo.precio_subastado;
                 this.porcentajeLoteModificar = recibo.pago_lote;
                 this.pagosModificar = {
@@ -2116,11 +2116,19 @@
                 console.warn("Bloqueado por falta de pago CMCPSL");
                 return;
             }
+            if (this.faltaCMCPSLMod < -TOLERANCIA) {
+                this.mostrarToast(`Error: El pago a CMCPSL excede lo requerido. Sobran: $${Math.abs(this.faltaCMCPSLMod).toFixed(2)}`);
+                return;
+            }
 
             // 2. Validar DPIP
             if (this.faltaDPIPMod > TOLERANCIA) {
                 this.mostrarToast(`Error: Falta completar el pago a DPIP. Restan: $${this.faltaDPIP.toFixed(2)}`);
                 console.warn("Bloqueado por falta de pago DPIP");
+                return;
+            }
+            if (this.faltaDPIPMod < -TOLERANCIA) {
+                this.mostrarToast(`Error: El pago a DPIP excede lo requerido. Sobran: $${Math.abs(this.faltaDPIPMod).toFixed(2)}`);
                 return;
             }
 
@@ -2130,6 +2138,11 @@
                 console.warn("Bloqueado por falta de pago Gobierno");
                 return;
             }
+            if (this.faltaGobiernoMod < -TOLERANCIA) {
+                this.mostrarToast(`Error: El pago al Gobierno excede lo requerido. Sobran: $${Math.abs(this.faltaGobiernoMod).toFixed(2)}`);
+                return;
+            }
+
         const payload = {
             // Datos de la persona (spread operator para sacar lo del form)
             nombre: datosPersonales.nombre,

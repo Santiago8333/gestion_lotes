@@ -75,7 +75,7 @@ public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
 
         if (LoteExiste)
         {
-            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
+            return Conflict(new { mensaje = $"El lote {datos.n_lote} ya tiene un recibo asociado y no puede duplicarse." });
         }
         string usuario = User.Identity?.Name ?? "Sistema";
         var recibo = await repo.CrearReciboConPagos(datos,usuario);

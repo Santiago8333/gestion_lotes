@@ -46,6 +46,7 @@ public class Recibo_persona_fisica
 public class CrearReciboRequest
 {
     public int id_lote { get; set; }
+    public int n_lote { get; set; }
     public string nombre { get; set; } = "";
     public string apellido { get; set; } = "";
     public string tipo_dni { get; set; } = "";

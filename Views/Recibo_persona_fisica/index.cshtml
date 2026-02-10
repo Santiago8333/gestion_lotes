@@ -26,10 +26,7 @@
                             <th scope="col">#</th>
                             <th scope="col">Nombre</th>
                             <th scope="col">Apellido</th>
-                            <th scope="col">Tipo Dni</th>
-                            <th scope="col">Dni</th>
-                            <th scope="col">Telefono</th>
-                            <th scope="col">Codigo Postal</th>
+                            <th scope="col">Numero de Lote</th>
                             <th scope="col">Email</th>
                             <th scope="col">Domicilio</th>
                             <th scope="col">Provincia</th>
@@ -47,10 +44,7 @@
                             <td>{{ recibo.index }}</td>
                             <td>{{ recibo.nombre }}</td>
                             <td>{{ recibo.apellido }}</td>
-                            <td>{{ recibo.tipo_dni }}</td>
-                            <td>{{ recibo.dni }}</td>
-                            <td>{{ recibo.telefono }}</td>
-                            <td>{{ recibo.codigo_postal }}</td>
+                            <td>{{ recibo.lote.n_lote}}</td>
                             <td>{{ recibo.email }}</td>
                             <td>{{ recibo.domicilio }}</td>
                             <td>{{ recibo.provincia }}</td>
@@ -113,7 +107,7 @@
             </li>
         </ul>
     </nav>
-    <!-- Modal -->
+    <!-- Modal Agregar-->
 <div class="modal fade" id="agregarModal" tabindex="-1" aria-labelledby="agregarModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -1933,6 +1927,7 @@
         // Datos del recibo y lote
         id_lote: this.loteSeleccionado.id_lote,
         precio_subastado: parseFloat(this.precioSubastado),
+        n_lote: this.loteSeleccionado.n_lote,
         
         lista_pagos: listaPagosArray
     };
@@ -2243,8 +2238,8 @@
                     
                     this.modalEliminarBS.hide();
                     this.mostrarToast("recibo eliminado");
-                    this.cargarRecibo();
-                    this.cambiarPagina(1);
+                    this.paginaActual = 1;
+                    await this.cargarRecibo();
                 } catch (error) {
                     console.error('Error al eliminar:', error);
                 }

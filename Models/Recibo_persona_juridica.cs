@@ -47,6 +47,7 @@ public class Recibo_persona_juridica
 public class CrearReciboRequestJuridica
 {
     public int id_lote { get; set; }
+    public int n_lote { get; set; }
     public string razon_social {get;set;} = "";
     public string apoderado_socio {get;set;} = "";
     public string tipo {get;set;} = "";

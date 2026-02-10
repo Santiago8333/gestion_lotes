@@ -13,7 +13,7 @@
                         type="text" 
                         id="busqueda"
                         class="form-control" 
-                        placeholder="Escribe un apellido o número de lote..."
+                        placeholder="Escribe razon social o número de lote..."
                         v-model="textoBusqueda"
                         v-on:input="buscarConRetraso"
                         >
@@ -26,10 +26,7 @@
                             <th scope="col">#</th>
                             <th scope="col">Razon Social</th>
                             <th scope="col">Apoderado Socio</th>
-                            <th scope="col">Tipo</th>
-                            <th scope="col">Numero</th>
-                            <th scope="col">Telefono</th>
-                            <th scope="col">Codigo Postal</th>
+                            <th scope="col">Numero de Lote</th>
                             <th scope="col">Email</th>
                             <th scope="col">Domicilio</th>
                             <th scope="col">Provincia</th>
@@ -47,10 +44,7 @@
                             <td>{{ recibo.index }}</td>
                             <td>{{ recibo.razon_social }}</td>
                             <td>{{ recibo.apoderado_socio }}</td>
-                            <td>{{ recibo.tipo }}</td>
-                            <td>{{ recibo.numero }}</td>
-                            <td>{{ recibo.telefono }}</td>
-                            <td>{{ recibo.codigo_postal }}</td>
+                            <td>{{ recibo.lote.n_lote }}</td>
                             <td>{{ recibo.email }}</td>
                             <td>{{ recibo.domicilio }}</td>
                             <td>{{ recibo.provincia }}</td>
@@ -1986,6 +1980,11 @@
                         console.warn("Bloqueado por falta de pago CMCPSL");
                         return;
                     }
+                    if (this.faltaCMCPSL < -TOLERANCIA) {
+                        this.mostrarToast(`Error: El pago a CMCPSL excede lo requerido. Sobran: $${Math.abs(this.faltaCMCPSL).toFixed(2)}`);
+                        this.modalAgregarBS.hide();
+                        return;
+                    }
 
                     // 2. Validar DPIP
                     if (this.faltaDPIP > TOLERANCIA) {
@@ -1993,11 +1992,21 @@
                         console.warn("Bloqueado por falta de pago DPIP");
                         return;
                     }
+                    if (this.faltaDPIP < -TOLERANCIA) {
+                        this.mostrarToast(`Error: El pago a DPIP excede lo requerido. Sobran: $${Math.abs(this.faltaDPIP).toFixed(2)}`);
+                        this.modalAgregarBS.hide();
+                        return;
+                    }
 
                     // 3. Validar Gobierno
                     if (this.faltaGobierno > TOLERANCIA) {
                         this.mostrarToast(`Error: Falta completar el pago al Gobierno. Restan: $${this.faltaGobierno.toFixed(2)}`);
                         console.warn("Bloqueado por falta de pago Gobierno");
+                        return;
+                    }
+                    if (this.faltaGobierno < -TOLERANCIA) {
+                        this.mostrarToast(`Error: El pago al Gobierno excede lo requerido. Sobran: $${Math.abs(this.faltaGobierno).toFixed(2)}`);
+                        this.modalAgregarBS.hide();
                         return;
                     }
                     
@@ -2017,6 +2026,7 @@
                 // Datos del recibo y lote
                 id_lote: this.loteSeleccionado.id_lote,
                 precio_subastado: parseFloat(this.precioSubastado),
+                n_lote: this.loteSeleccionado.n_lote,
                 
                 lista_pagos: listaPagosArray
             };

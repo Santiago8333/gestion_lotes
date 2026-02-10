@@ -16,6 +16,7 @@ namespace gestion_lotes.Models
         IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null);
         Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
         Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir);
+        Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExcluir = null, int? idReciboJuridicaExcluir = null);
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -257,6 +258,21 @@ public async Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, C
 public async Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir)
 {
     return await _context.Recibo_persona_fisica.AnyAsync(r => r.id_lote == idLote && r.id_recibo_persona_fisica != idReciboAExcluir);
+}
+public async Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExcluir = null, int? idReciboJuridicaExcluir = null)
+{
+    
+    bool existeEnFisica = await _context.Recibo_persona_fisica
+        .AnyAsync(r => r.id_lote == idLote && 
+                (!idReciboFisicaExcluir.HasValue || r.id_recibo_persona_fisica != idReciboFisicaExcluir));
+
+    if (existeEnFisica) return true;
+
+    bool existeEnJuridica = await _context.Recibo_persona_juridica
+        .AnyAsync(r => r.id_lote == idLote && 
+                (!idReciboJuridicaExcluir.HasValue || r.id_recibo_persona_juridica != idReciboJuridicaExcluir));
+
+    return existeEnJuridica;
 }
     }
     

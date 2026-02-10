@@ -124,11 +124,15 @@ public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestMd datos
 
     try
     {
-        bool LoteExiste = await repo.ExisteReciboEnLoteMd(datos.id_lote,datos.id_recibo_persona_fisica);
+        bool loteDuplicado = await repo.ExisteLoteDuplicado(
+            datos.id_lote, 
+            idReciboFisicaExcluir: datos.id_recibo_persona_fisica, 
+            idReciboJuridicaExcluir: null
+        );
 
-        if (LoteExiste)
+        if (loteDuplicado)
         {
-            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya tiene un recibo asociado y no puede duplicarse." });
+            return Conflict(new { mensaje = $"El lote {datos.n_lote} ya tiene un recibo asociado y no puede duplicarse." });
         }
         string usuario = User.Identity?.Name ?? "Sistema";
         var recibo = await repo.ModificarReciboConPagos(datos.id_recibo_persona_fisica,datos,usuario);

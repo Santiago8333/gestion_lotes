@@ -156,7 +156,7 @@ public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestJMd dato
 
         if (loteDuplicado)
         {
-            return Conflict(new { mensaje = $"El lote {datos.id_lote} ya está asignado a otro recibo físico o jurídico." });
+            return Conflict(new { mensaje = $"El lote {datos.n_lote} ya está asignado a otro recibo físico o jurídico." });
         }
         string usuario = User.Identity?.Name ?? "Sistema";
         var recibo = await repo.ModificarReciboConPagos(datos.id_recibo_persona_juridica,datos,usuario);

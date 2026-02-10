@@ -64,6 +64,7 @@ public class CrearReciboRequestJMd
 {
     public int id_lote { get; set; }
     public int id_recibo_persona_juridica {get;set;}
+    public int n_lote { get; set; }
     public string razon_social {get;set;} = "";
     public string apoderado_socio {get;set;} = "";
     public string tipo {get;set;} = "";

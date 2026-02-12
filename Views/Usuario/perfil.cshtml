@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Perfil";
+}
+<div id="app">
+<div class="card mb-3 bg-light">
+    <div class="card-body">
+        <h1>Perfil</h1>
+        <form  v-on:submit.prevent="ModificarPerfil" id="formModificarPerfil" class="needs-validation" novalidate>
+                @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="nombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="nombre" name="nombre" v-model="usuario.nombre" required>
+                <div class="invalid-feedback">El Nombre es obligatorio.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="apellido" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="apellido" name="apellido" v-model="usuario.apellido" required>
+                <div class="invalid-feedback">El Apellido es obligatorio.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" v-model="usuario.email" required>
+                <div class="invalid-feedback">El Email es obligatorio.</div>
+            </div>
+            <div class="col-12 mb-3 text-end">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div> 
+        </form>
+    </div>
+</div>
+</div>
+@section Scripts {
+<script>
+const appConfig = {
+        data() {
+            return {
+                usuario: {
+                    nombre: '',
+                    apellido: '',
+                    email: ''
+                }
+            };
+        },
+        mounted() {
+            this.obtenerMiPerfil();
+        },
+        methods: {
+            obtenerMiPerfil() {
+                fetch('/api/miperfil')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Error al obtener el perfil');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        this.usuario = data;
+                    })
+                    .catch(error => {
+                        console.error('Hubo un problema:', error);
+                        alert("No se pudieron cargar los datos del perfil.");
+                    });
+            },
+            ModificarPerfil() {
+                console.log("Guardando...", this.usuario);
+            }
+        }
+    };
+
+    const app = Vue.createApp(appConfig);
+    window.appInstance = app.mount('#app');
+</script>
+}

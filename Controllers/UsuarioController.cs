@@ -31,6 +31,34 @@ public IActionResult Index()
 {
     return View(); 
 }
+public IActionResult Perfil()
+{
+    return View(); 
+}
+[HttpGet]
+[Route("api/miperfil")] 
+public async Task<IActionResult> ObtenerMiPerfil()
+{
+    var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
+    if (idClaim == null) return Unauthorized();
+
+    int idUsuario = int.Parse(idClaim);
+
+    var usuario = await repo.ObtenerPorId(idUsuario);
+    if (usuario == null)
+    {
+        return NotFound(new { mensaje = "Usuario no encontrado." });
+    }
+    var perfilDto = new PerfilDto 
+    {
+        nombre = usuario.nombre,
+        apellido = usuario.apellido,
+        email = usuario.email
+    };
+
+    return Ok(perfilDto);
+}
     [AllowAnonymous]
 public IActionResult Login()
 {
@@ -346,6 +374,7 @@ public async Task<IActionResult> Login([FromBody] LoginViewModel loginModel)
     }
     var claims = new List<Claim>
     {
+        new Claim(ClaimTypes.NameIdentifier, e.id_usuario.ToString()),
         new Claim(ClaimTypes.Name, e.email),
         new Claim("FullName", e.nombre + " " + e.apellido),
         new Claim("AvatarUrl", AvatarUrl), 

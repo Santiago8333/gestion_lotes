@@ -44,3 +44,12 @@ public class Usuarios
     [Column("fecha_creacion")]
     public DateTime fecha_creacion { get; set; }
 }
+
+public class PerfilDto
+{
+    public string? nombre { get; set; }
+    public string? apellido { get; set; }
+    public string? email { get; set; }
+    [NotMapped]
+    public IFormFile? avatarFile { get; set; }
+}

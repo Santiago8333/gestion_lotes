@@ -54,12 +54,70 @@ public async Task<IActionResult> ObtenerMiPerfil()
     {
         nombre = usuario.nombre,
         apellido = usuario.apellido,
-        email = usuario.email
+        email = usuario.email,
+        id_usuario = usuario.id_usuario
     };
 
     return Ok(perfilDto);
 }
-    [AllowAnonymous]
+[HttpPut]
+[Route("api/actualizarperfil")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ModificarPerfil([FromBody] PerfilDto usuario)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState); 
+    }
+
+    try
+    {
+        var perfilActualizado = await repo.ModificarPerfil(usuario);
+
+        if (perfilActualizado == null)
+        {
+            return NotFound(new { mensaje = "No se encontró el usuario especificado." });
+        }
+        var rolActual = User.FindFirst(ClaimTypes.Role)?.Value ?? "Usuario";
+        var avatarActual = User.FindFirst("AvatarUrl")?.Value ?? "";
+
+        var nuevoAvatar = !string.IsNullOrEmpty(usuario.avatarUrl) ? usuario.avatarUrl : avatarActual;
+
+       
+        var nuevasClaims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, perfilActualizado.id_usuario.ToString()),
+            new Claim(ClaimTypes.Name, perfilActualizado.email ?? ""),
+            new Claim("FullName", perfilActualizado.nombre + " " + perfilActualizado.apellido),
+            new Claim("AvatarUrl", nuevoAvatar), 
+            new Claim(ClaimTypes.Role, rolActual)
+        };
+
+        var claimsIdentity = new ClaimsIdentity(nuevasClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme, 
+            new ClaimsPrincipal(claimsIdentity),
+            new AuthenticationProperties 
+            { 
+                IsPersistent = true 
+            }
+        );
+        return Ok(new { 
+            mensaje = "Perfil actualizado correctamente", 
+            datos = perfilActualizado 
+        });
+    }
+    catch (Exception ex)
+    {
+        
+        return StatusCode(StatusCodes.Status500InternalServerError, new { 
+            mensaje = "Error interno del servidor al actualizar el perfil.",
+            error = ex.Message
+        });
+    }
+}
+[AllowAnonymous]
 public IActionResult Login()
 {
     return View();

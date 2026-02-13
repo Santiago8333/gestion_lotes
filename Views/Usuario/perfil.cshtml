@@ -7,6 +7,7 @@
         <h1>Perfil</h1>
         <form  v-on:submit.prevent="ModificarPerfil" id="formModificarPerfil" class="needs-validation" novalidate>
                 @Html.AntiForgeryToken()
+                <input type="hidden" name="id_usuario" v-model="usuario.id_usuario">
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="nombre" class="form-label">Nombre</label>
@@ -32,45 +33,106 @@
     </div>
 </div>
 </div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Sistema</strong>
+      <small class="text-muted">justo ahora</small>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+    </div>
+    <div class="toast-body">
+      @TempData["Mensaje"]
+    </div>
+  </div>
+</div>
 @section Scripts {
 <script>
 const appConfig = {
-        data() {
-            return {
-                usuario: {
-                    nombre: '',
-                    apellido: '',
-                    email: ''
-                }
-            };
-        },
-        mounted() {
-            this.obtenerMiPerfil();
-        },
-        methods: {
-            obtenerMiPerfil() {
-                fetch('/api/miperfil')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Error al obtener el perfil');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        this.usuario = data;
-                    })
-                    .catch(error => {
-                        console.error('Hubo un problema:', error);
-                        alert("No se pudieron cargar los datos del perfil.");
-                    });
-            },
-            ModificarPerfil() {
-                console.log("Guardando...", this.usuario);
+    data() {
+        return {
+            usuario: {
+                id_usuario: 0, // Asegúrate de tener el ID si lo necesitas en tu DTO
+                nombre: '',
+                apellido: '',
+                email: ''
             }
-        }
-    };
+        };
+    },
+    mounted() {
+        this.obtenerMiPerfil();
+        const toastEl = document.getElementById('successToast');
+        if (toastEl) this.toastBS = new bootstrap.Toast(toastEl);
+    },
+    methods: {
+        obtenerMiPerfil() {
+            fetch('/api/miperfil')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al obtener el perfil');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    this.usuario = data;
+                })
+                .catch(error => {
+                    console.error('Hubo un problema:', error);
+                    alert("No se pudieron cargar los datos del perfil.");
+                });
+        },
+        
+        async ModificarPerfil() {
+            const form = document.getElementById('formModificarPerfil');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            form.classList.add('was-validated');
+            console.log('Enviando datos:', this.usuario);
+            try {
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenElement ? tokenElement.value : '';
 
-    const app = Vue.createApp(appConfig);
-    window.appInstance = app.mount('#app');
+                const response = await fetch('/api/actualizarperfil', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token 
+                    },
+                    body: JSON.stringify(this.usuario) 
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                }
+
+                if (this.mostrarToast) {
+                    this.mostrarToast(data.mensaje); 
+                } else {
+                    alert(data.mensaje);
+                }
+
+            } catch (error) {
+                console.error('Error al modificar el perfil:', error);
+                
+                if (this.mostrarToast) {
+                    this.mostrarToast(error.message);
+                } else {
+                    alert(error.message);
+                }
+            }
+        },
+        mostrarToast(mensaje) {
+            const toastBody = document.querySelector('#successToast .toast-body');
+            if(toastBody) toastBody.textContent = mensaje;
+            if(this.toastBS) this.toastBS.show();
+        },
+    }
+};
+
+const app = Vue.createApp(appConfig);
+window.appInstance = app.mount('#app');
 </script>
 }

@@ -12,6 +12,7 @@ namespace gestion_lotes.Models
         Task<Usuarios> Agregar(Usuarios usuario);
         Task<Usuarios?> ObtenerPorEmailAsync(string email);
         Task<Usuarios?> Modificar(Usuarios usuario);
+        Task<PerfilDto?> ModificarPerfil(PerfilDto usuario);
     }
 
     public class RepositorioUsuario : IUsuarioRepositorio
@@ -90,6 +91,29 @@ namespace gestion_lotes.Models
         await _context.SaveChangesAsync();
 
         return usuarioEnDb;
+    }
+    public async Task<PerfilDto?> ModificarPerfil(PerfilDto usuario)
+    {
+    var usuarioEnDb = await _context.Usuarios.FindAsync(usuario.id_usuario);
+
+    if (usuarioEnDb == null)
+    {
+        return null;
+    }
+
+    usuarioEnDb.nombre = usuario.nombre ?? usuarioEnDb.nombre; 
+    usuarioEnDb.apellido = usuario.apellido ?? usuarioEnDb.apellido; 
+    usuarioEnDb.email = usuario.email ?? usuarioEnDb.email; 
+    
+    await _context.SaveChangesAsync();
+
+    return new PerfilDto
+    {
+        id_usuario = usuarioEnDb.id_usuario,
+        nombre = usuarioEnDb.nombre,
+        apellido = usuarioEnDb.apellido,
+        email = usuarioEnDb.email,
+    };
     }
     }
 }

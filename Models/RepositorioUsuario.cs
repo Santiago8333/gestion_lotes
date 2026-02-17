@@ -13,6 +13,7 @@ namespace gestion_lotes.Models
         Task<Usuarios?> ObtenerPorEmailAsync(string email);
         Task<Usuarios?> Modificar(Usuarios usuario);
         Task<PerfilDto?> ModificarPerfil(PerfilDto usuario);
+        Task<PerfilDto?> ModificarImagenPerfil(PerfilDto usuario);
     }
 
     public class RepositorioUsuario : IUsuarioRepositorio
@@ -113,6 +114,28 @@ namespace gestion_lotes.Models
         nombre = usuarioEnDb.nombre,
         apellido = usuarioEnDb.apellido,
         email = usuarioEnDb.email,
+    };
+    }
+    public async Task<PerfilDto?> ModificarImagenPerfil(PerfilDto usuario)
+    {
+    var usuarioEnDb = await _context.Usuarios.FindAsync(usuario.id_usuario);
+
+    if (usuarioEnDb == null)
+    {
+        return null;
+    }
+
+    usuarioEnDb.avatarUrl = usuario.avatarUrl ?? usuarioEnDb.avatarUrl; 
+    
+    await _context.SaveChangesAsync();
+
+    return new PerfilDto
+    {
+        id_usuario = usuarioEnDb.id_usuario,
+        nombre = usuarioEnDb.nombre,
+        apellido = usuarioEnDb.apellido,
+        email = usuarioEnDb.email,
+        avatarUrl = usuarioEnDb.avatarUrl
     };
     }
     }

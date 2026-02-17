@@ -33,6 +33,30 @@
     </div>
 </div>
 </div>
+
+<div class="card mb-3 bg-light">
+    <div class="card-body">
+        <h1>Cambiar Imagen de Perfil</h1>
+        <form v-on:submit.prevent="modificarimagen" class="needs-validation" id="formModificarImagenUsuario" enctype="multipart/form-data" novalidate>
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <span>Imagen actual:</span>
+                <img src="@User.FindFirst("AvatarUrl")?.Value" class="rounded-circle me-2" alt="avatar" style="width: 32px; height: 32px;">
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="AvatarFile" class="form-label">Avatar</label>
+                <input class="form-control" id="avatarFile" name="avatarFile" type="file" required>
+                <div class="invalid-feedback">El Avatar es obligatorio.</div>
+            </div>
+            <div class="col-12 mb-3 text-end">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="toast-header">
@@ -51,7 +75,7 @@ const appConfig = {
     data() {
         return {
             usuario: {
-                id_usuario: 0, // Asegúrate de tener el ID si lo necesitas en tu DTO
+                id_usuario: 0,
                 nombre: '',
                 apellido: '',
                 email: ''
@@ -110,6 +134,7 @@ const appConfig = {
 
                 if (this.mostrarToast) {
                     this.mostrarToast(data.mensaje); 
+                    document.getElementById("perfilemail").innerText = this.usuario.email;
                 } else {
                     alert(data.mensaje);
                 }
@@ -118,6 +143,7 @@ const appConfig = {
                 console.error('Error al modificar el perfil:', error);
                 
                 if (this.mostrarToast) {
+                    this.obtenerMiPerfil();
                     this.mostrarToast(error.message);
                 } else {
                     alert(error.message);

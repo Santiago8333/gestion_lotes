@@ -72,6 +72,18 @@ public async Task<IActionResult> ModificarPerfil([FromBody] PerfilDto usuario)
 
     try
     {
+        if (string.IsNullOrWhiteSpace(usuario.email))
+        {
+            return BadRequest(new { mensaje = "El email es obligatorio." });
+        }
+        
+        var usuarioExistente = await repo.ObtenerPorEmailAsync(usuario.email);
+
+        if (usuarioExistente != null && usuarioExistente.id_usuario != usuario.id_usuario)
+        {
+            return BadRequest(new { mensaje = "El email ingresado ya está registrado por otra persona." });
+        }
+
         var perfilActualizado = await repo.ModificarPerfil(usuario);
 
         if (perfilActualizado == null)
@@ -114,6 +126,58 @@ public async Task<IActionResult> ModificarPerfil([FromBody] PerfilDto usuario)
         return StatusCode(StatusCodes.Status500InternalServerError, new { 
             mensaje = "Error interno del servidor al actualizar el perfil.",
             error = ex.Message
+        });
+    }
+}
+[HttpPut]
+[Route("api/actualizarimagenperfil")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ModificarImagenPerfil([FromBody] PerfilDto usuario)
+{
+
+    if (string.IsNullOrWhiteSpace(usuario.avatarUrl))
+    {
+        return BadRequest(new { mensaje = "La imagen es obligatoria." });
+    }
+
+    try
+    {
+
+        var perfilActualizado = await repo.ModificarPerfil(usuario);
+
+        if (perfilActualizado == null)
+        {
+            return NotFound(new { mensaje = "No se encontró el usuario." });
+        }
+
+        var rolActual = User.FindFirst(ClaimTypes.Role)?.Value ?? "Usuario";
+
+        var nuevasClaims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, perfilActualizado.id_usuario.ToString()),
+            new Claim(ClaimTypes.Name, perfilActualizado.email ?? ""),
+            new Claim("FullName", perfilActualizado.nombre + " " + perfilActualizado.apellido),
+            new Claim("AvatarUrl", usuario.avatarUrl),
+            new Claim(ClaimTypes.Role, rolActual)
+        };
+
+        var claimsIdentity = new ClaimsIdentity(nuevasClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme, 
+            new ClaimsPrincipal(claimsIdentity),
+            new AuthenticationProperties { IsPersistent = true }
+        );
+
+        return Ok(new { 
+            mensaje = "Imagen actualizada correctamente", 
+            nuevaImagenUrl = usuario.avatarUrl 
+        });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { 
+            mensaje = "Error al actualizar la imagen.", error = ex.Message
         });
     }
 }

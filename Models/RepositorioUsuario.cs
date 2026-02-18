@@ -14,6 +14,7 @@ namespace gestion_lotes.Models
         Task<Usuarios?> Modificar(Usuarios usuario);
         Task<PerfilDto?> ModificarPerfil(PerfilDto usuario);
         Task<PerfilDto?> ModificarImagenPerfil(PerfilDto usuario);
+        Task<PerfilDto?> ModificarClavePerfil(PerfilDto usuario);
     }
 
     public class RepositorioUsuario : IUsuarioRepositorio
@@ -126,6 +127,28 @@ namespace gestion_lotes.Models
     }
 
     usuarioEnDb.avatarUrl = usuario.avatarUrl ?? usuarioEnDb.avatarUrl; 
+    
+    await _context.SaveChangesAsync();
+
+    return new PerfilDto
+    {
+        id_usuario = usuarioEnDb.id_usuario,
+        nombre = usuarioEnDb.nombre,
+        apellido = usuarioEnDb.apellido,
+        email = usuarioEnDb.email,
+        avatarUrl = usuarioEnDb.avatarUrl
+    };
+    }
+    public async Task<PerfilDto?> ModificarClavePerfil(PerfilDto usuario)
+    {
+    var usuarioEnDb = await _context.Usuarios.FindAsync(usuario.id_usuario);
+
+    if (usuarioEnDb == null)
+    {
+        return null;
+    }
+
+    usuarioEnDb.clave = usuario.clave ?? usuarioEnDb.clave; 
     
     await _context.SaveChangesAsync();
 

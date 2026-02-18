@@ -52,6 +52,8 @@ public class PerfilDto
     public string? apellido { get; set; }
     public string? email { get; set; }
     public string? avatarUrl { get; set; }
+    public string? clave { get; set; } = "";
+    public string? oldClave { get; set; } = "";
     [NotMapped]
     public IFormFile? avatarFile { get; set; }
 }

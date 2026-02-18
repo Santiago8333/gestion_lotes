@@ -60,6 +60,30 @@
 </div>
 
 
+<div class="card mb-3 bg-light">
+    <div class="card-body">
+        <h1>Cambiar Clave</h1>
+        <form v-on:submit.prevent="ModificarClavePerfil" class="needs-validation" id="formModificarClaveUsuario" novalidate>
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="clave" class="form-label">Clave</label>
+                <input class="form-control" id="clave" name="clave" type="text" required>
+                <div class="invalid-feedback">El Avatar es obligatorio.</div>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label for="oldClave" class="form-label">Clave Vieja</label>
+                <input class="form-control" id="oldClave" name="oldClave" type="text" required>
+                <div class="invalid-feedback">El Clave Vieja es obligatorio.</div>
+            </div>
+            <div class="col-12 mb-3 text-end">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </div>
+        </div>
+        </form>
+    </div>
+</div>
+
 
 
 </div>

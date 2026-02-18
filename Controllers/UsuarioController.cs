@@ -225,6 +225,88 @@ public async Task<IActionResult> ModificarImagenPerfil([FromForm] PerfilDto usua
         });
     }
 }
+[HttpPut]
+[Route("api/actualizarclaveperfil")]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ModificarClavePerfil([FromBody] PerfilDto usuario)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState); 
+    }
+
+    try
+    {
+        var usuarioEnDb = await repo.ObtenerPorId(usuario.id_usuario); 
+        
+        if (usuarioEnDb == null)
+        {
+            return NotFound(new { mensaje = "No se encontró el usuario en la base de datos." });
+        }
+
+        // 1. Validar que vengan los datos necesarios
+        if (string.IsNullOrEmpty(usuario.oldClave) || string.IsNullOrEmpty(usuario.clave))
+        {
+            return BadRequest(new { mensaje = "Debe proporcionar la clave actual y la nueva." });
+        }
+
+        var saltString = config["Salt"];
+        if (string.IsNullOrEmpty(saltString))
+        {
+            throw new InvalidOperationException("El valor 'Salt' no está configurado.");
+        }
+
+        byte[] saltBytes = System.Text.Encoding.ASCII.GetBytes(saltString);
+
+        // 2. Hashear la clave vieja que ingresó el usuario para comparar
+        string hashedOld = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password: usuario.oldClave,
+            salt: saltBytes,
+            prf: KeyDerivationPrf.HMACSHA1,
+            iterationCount: 1000,
+            numBytesRequested: 256 / 8));
+
+        // 3. Validar si la clave vieja ingresada NO coincide con la de la base de datos
+        if (hashedOld != usuarioEnDb.clave)
+        {
+            return BadRequest(new { mensaje = "La contraseña actual ingresada es incorrecta." });
+        }
+
+        // 4. Si coincide, procedemos a hashear la NUEVA clave
+        string hashedNew = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password: usuario.clave, // Hasheamos la NUEVA clave
+            salt: saltBytes,
+            prf: KeyDerivationPrf.HMACSHA1,
+            iterationCount: 1000,
+            numBytesRequested: 256 / 8));
+
+        // 5. Asignamos la nueva clave hasheada al objeto que irá a la base de datos
+        usuario.clave = hashedNew;
+
+        // Limpiamos las propiedades en texto plano por seguridad antes de mandar al repo
+        usuario.oldClave = null;
+        usuario.clave = null;
+
+        var perfilActualizado = await repo.ModificarClavePerfil(usuario);
+
+        if (perfilActualizado == null)
+        {
+            return NotFound(new { mensaje = "No se pudo actualizar el usuario." });
+        }
+       
+        return Ok(new { 
+            mensaje = "Contraseña actualizada correctamente", 
+            datos = perfilActualizado 
+        });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { 
+            mensaje = "Error interno del servidor al actualizar la contraseña.",
+            error = ex.Message
+        });
+    }
+}
 [AllowAnonymous]
 public IActionResult Login()
 {

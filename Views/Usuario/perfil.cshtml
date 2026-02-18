@@ -32,17 +32,19 @@
         </form>
     </div>
 </div>
-</div>
+
+
+
 
 <div class="card mb-3 bg-light">
     <div class="card-body">
         <h1>Cambiar Imagen de Perfil</h1>
-        <form v-on:submit.prevent="modificarimagen" class="needs-validation" id="formModificarImagenUsuario" enctype="multipart/form-data" novalidate>
+        <form v-on:submit.prevent="ModificarImagenPerfil" class="needs-validation" id="formModificarImagenUsuario" enctype="multipart/form-data" novalidate>
         @Html.AntiForgeryToken()
         <div class="row">
             <div class="col-md-12 mb-3">
                 <span>Imagen actual:</span>
-                <img src="@User.FindFirst("AvatarUrl")?.Value" class="rounded-circle me-2" alt="avatar" style="width: 32px; height: 32px;">
+                <img src="@User.FindFirst("AvatarUrl")?.Value" id="perfilimagen2" class="rounded-circle me-2" alt="avatar" style="width: 32px; height: 32px;">
             </div>
             <div class="col-md-12 mb-3">
                 <label for="AvatarFile" class="form-label">Avatar</label>
@@ -56,6 +58,12 @@
         </form>
     </div>
 </div>
+
+
+
+
+</div>
+
 
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
   <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -144,6 +152,59 @@ const appConfig = {
                 
                 if (this.mostrarToast) {
                     this.obtenerMiPerfil();
+                    this.mostrarToast(error.message);
+                } else {
+                    alert(error.message);
+                }
+            }
+        },
+        async ModificarImagenPerfil() {
+            const form = document.getElementById('formModificarImagenUsuario');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            form.classList.add('was-validated');
+            
+            try {
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenElement ? tokenElement.value : '';
+
+                const formData = new FormData();
+
+                formData.append("id_usuario", this.usuario.id_usuario);
+
+                const fileInput = document.getElementById('avatarFile');
+                if (fileInput.files.length > 0) {
+                    formData.append("avatarFile", fileInput.files[0]); 
+                }
+
+                const response = await fetch('/api/actualizarimagenperfil', {
+                    method: 'PUT',
+                    headers: {
+                        'RequestVerificationToken': token 
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                }
+
+                if (this.mostrarToast) {
+                    this.mostrarToast(data.mensaje); 
+                    //console.log(data.nuevaImagenUrl);
+                    document.getElementById("perfilimagen").src = data.nuevaImagenUrl;
+                    document.getElementById("perfilimagen2").src = data.nuevaImagenUrl;
+                } else {
+                    alert(data.mensaje);
+                }
+
+            } catch (error) {
+                console.error('Error al modificar la imagen:', error);
+                if (this.mostrarToast) {
                     this.mostrarToast(error.message);
                 } else {
                     alert(error.message);

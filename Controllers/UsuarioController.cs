@@ -132,22 +132,66 @@ public async Task<IActionResult> ModificarPerfil([FromBody] PerfilDto usuario)
 [HttpPut]
 [Route("api/actualizarimagenperfil")]
 [ValidateAntiForgeryToken]
-public async Task<IActionResult> ModificarImagenPerfil([FromBody] PerfilDto usuario)
+public async Task<IActionResult> ModificarImagenPerfil([FromForm] PerfilDto usuario, IFormFile? avatarFile)
 {
-
-    if (string.IsNullOrWhiteSpace(usuario.avatarUrl))
-    {
-        return BadRequest(new { mensaje = "La imagen es obligatoria." });
-    }
-
     try
     {
+        var usuarioEnDb = await repo.ObtenerPorId(usuario.id_usuario); 
+        
+        if (usuarioEnDb == null)
+        {
+            return NotFound(new { mensaje = "No se encontró el usuario en la base de datos." });
+        }
 
-        var perfilActualizado = await repo.ModificarPerfil(usuario);
+        string avatarAntiguoUrl = usuarioEnDb.avatarUrl ?? "";
+
+        if (avatarFile != null && avatarFile.Length > 0)
+        {
+            var uploadsDir = Path.Combine(_environment.WebRootPath, "images", "avatars");
+            if (!Directory.Exists(uploadsDir))
+            {
+                Directory.CreateDirectory(uploadsDir);
+            }
+
+            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+            string filePath = Path.Combine(uploadsDir, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await avatarFile.CopyToAsync(stream);
+            }
+
+            usuario.avatarUrl = $"/images/avatars/{fileName}";
+
+            if (!string.IsNullOrEmpty(avatarAntiguoUrl) && 
+                avatarAntiguoUrl != "/images/avatars/default-avatar.png") 
+            {
+                try
+                {
+                    string nombreArchivoAntiguo = Path.GetFileName(avatarAntiguoUrl);
+                    string rutaFisicaAntigua = Path.Combine(uploadsDir, nombreArchivoAntiguo);
+
+                    if (System.IO.File.Exists(rutaFisicaAntigua))
+                    {
+                        System.IO.File.Delete(rutaFisicaAntigua);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error al eliminar avatar antiguo: {ex.Message}");
+                }
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(usuario.avatarUrl))
+        {
+            return BadRequest(new { mensaje = "La imagen es obligatoria." });
+        }
+
+        var perfilActualizado = await repo.ModificarImagenPerfil(usuario);
 
         if (perfilActualizado == null)
         {
-            return NotFound(new { mensaje = "No se encontró el usuario." });
+            return NotFound(new { mensaje = "Error al actualizar el perfil en la base de datos." });
         }
 
         var rolActual = User.FindFirst(ClaimTypes.Role)?.Value ?? "Usuario";

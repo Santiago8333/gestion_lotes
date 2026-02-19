@@ -66,14 +66,14 @@
         <form v-on:submit.prevent="ModificarClavePerfil" class="needs-validation" id="formModificarClaveUsuario" novalidate>
         @Html.AntiForgeryToken()
         <div class="row">
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="clave" class="form-label">Clave</label>
-                <input class="form-control" id="clave" name="clave" type="text" required>
-                <div class="invalid-feedback">El Avatar es obligatorio.</div>
+                <input class="form-control" id="clave" name="clave" type="text" v-model="usuario.clave" required>
+                <div class="invalid-feedback">El Clave es obligatorio.</div>
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-md-6 mb-3">
                 <label for="oldClave" class="form-label">Clave Vieja</label>
-                <input class="form-control" id="oldClave" name="oldClave" type="text" required>
+                <input class="form-control" id="oldClave" name="oldClave" type="text" v-model="usuario.oldClave" required>
                 <div class="invalid-feedback">El Clave Vieja es obligatorio.</div>
             </div>
             <div class="col-12 mb-3 text-end">
@@ -110,7 +110,9 @@ const appConfig = {
                 id_usuario: 0,
                 nombre: '',
                 apellido: '',
-                email: ''
+                email: '',
+                clave: '',
+                oldClave: ''
             }
         };
     },
@@ -167,6 +169,8 @@ const appConfig = {
                 if (this.mostrarToast) {
                     this.mostrarToast(data.mensaje); 
                     document.getElementById("perfilemail").innerText = this.usuario.email;
+                    this.limpiarformperfil();
+                    this.obtenerMiPerfil();
                 } else {
                     alert(data.mensaje);
                 }
@@ -222,6 +226,7 @@ const appConfig = {
                     //console.log(data.nuevaImagenUrl);
                     document.getElementById("perfilimagen").src = data.nuevaImagenUrl;
                     document.getElementById("perfilimagen2").src = data.nuevaImagenUrl;
+                    this.limpiarformimagen();
                 } else {
                     alert(data.mensaje);
                 }
@@ -233,6 +238,79 @@ const appConfig = {
                 } else {
                     alert(error.message);
                 }
+            }
+        },
+        async ModificarClavePerfil() {
+            const form = document.getElementById('formModificarClaveUsuario');
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+            form.classList.add('was-validated');
+            
+            try {
+                const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                const token = tokenElement ? tokenElement.value : '';
+
+                const formData = new FormData();
+
+                const response = await fetch('/api/actualizarclaveperfil', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token 
+                    },
+                    body: JSON.stringify(this.usuario) 
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.mensaje || 'Error al procesar la solicitud.');
+                }
+
+                if (this.mostrarToast) {
+                    this.mostrarToast(data.mensaje);
+                    console.log(data.datos);
+                    this.limpiarformclave()
+                } else {
+                    alert(data.mensaje);
+                }
+
+            } catch (error) {
+                console.error('Error al modificar la clave:', error);
+                if (this.mostrarToast) {
+                    this.mostrarToast(error.message);
+                    
+                } else {
+                    alert(error.message);
+                }
+            }
+        },
+        limpiarformclave() {
+            this.usuario.clave = '';
+            this.usuario.oldClave = '';
+
+            const form = document.getElementById('formModificarClaveUsuario');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
+        limpiarformperfil() {
+            
+            const form = document.getElementById('formModificarPerfil');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
+        limpiarformimagen() {
+            const form = document.getElementById('formModificarImagenUsuario');
+            
+            if (form) {
+                form.classList.remove('was-validated');
+                
+                form.reset(); 
+                
             }
         },
         mostrarToast(mensaje) {

@@ -158,7 +158,6 @@ namespace gestion_lotes.Models
         nombre = usuarioEnDb.nombre,
         apellido = usuarioEnDb.apellido,
         email = usuarioEnDb.email,
-        avatarUrl = usuarioEnDb.avatarUrl
     };
     }
     }

@@ -72,6 +72,24 @@ public async Task<IActionResult> ModificarPerfil([FromBody] PerfilDto usuario)
 
     try
     {
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
+        if (idClaim == null) return Unauthorized();
+
+        int idUsuario = int.Parse(idClaim);
+
+        //forzar id 
+        usuario.id_usuario = idUsuario;
+
+        //obetner email del claim
+
+        var emailClaim = User.FindFirst(ClaimTypes.Name)?.Value; 
+
+        if (emailClaim == null) return Unauthorized();
+
+        string emailUsuarioLogueado = emailClaim;
+
+
         if (string.IsNullOrWhiteSpace(usuario.email))
         {
             return BadRequest(new { mensaje = "El email es obligatorio." });
@@ -136,7 +154,16 @@ public async Task<IActionResult> ModificarImagenPerfil([FromForm] PerfilDto usua
 {
     try
     {
-        var usuarioEnDb = await repo.ObtenerPorId(usuario.id_usuario); 
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
+        if (idClaim == null) return Unauthorized();
+
+        int idUsuario = int.Parse(idClaim);
+
+        //forzar id 
+        usuario.id_usuario = idUsuario;
+
+        var usuarioEnDb = await repo.ObtenerPorId(idUsuario); 
         
         if (usuarioEnDb == null)
         {
@@ -237,7 +264,16 @@ public async Task<IActionResult> ModificarClavePerfil([FromBody] PerfilDto usuar
 
     try
     {
-        var usuarioEnDb = await repo.ObtenerPorId(usuario.id_usuario); 
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value; 
+
+        if (idClaim == null) return Unauthorized();
+
+        int idUsuario = int.Parse(idClaim);
+
+        //forzar id 
+        usuario.id_usuario = idUsuario;
+
+        var usuarioEnDb = await repo.ObtenerPorId(idUsuario); 
         
         if (usuarioEnDb == null)
         {
@@ -269,7 +305,7 @@ public async Task<IActionResult> ModificarClavePerfil([FromBody] PerfilDto usuar
         // 3. Validar si la clave vieja ingresada NO coincide con la de la base de datos
         if (hashedOld != usuarioEnDb.clave)
         {
-            return BadRequest(new { mensaje = "La contraseña actual ingresada es incorrecta." });
+            return BadRequest(new { mensaje = "La contraseña vieja actual ingresada es incorrecta." });
         }
 
         // 4. Si coincide, procedemos a hashear la NUEVA clave
@@ -283,11 +319,10 @@ public async Task<IActionResult> ModificarClavePerfil([FromBody] PerfilDto usuar
         // 5. Asignamos la nueva clave hasheada al objeto que irá a la base de datos
         usuario.clave = hashedNew;
 
-        // Limpiamos las propiedades en texto plano por seguridad antes de mandar al repo
         usuario.oldClave = null;
-        usuario.clave = null;
 
         var perfilActualizado = await repo.ModificarClavePerfil(usuario);
+
 
         if (perfilActualizado == null)
         {

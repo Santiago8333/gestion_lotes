@@ -87,6 +87,7 @@ public async Task<IActionResult> Agregar([FromBody] CrearReciboRequest datos)
          return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
+[Authorize(Policy = "Administrador")]
 [HttpDelete]
 [Route("api/recibos/{id}")]
 public async Task<IActionResult> EliminarRecibo(int id)

@@ -52,11 +52,14 @@
                                                 <i class="fa-solid fa-pencil"></i> Modificar
                                             </a>
                                         </li>
+                                         @if (User.IsInRole("Administrador"))
+                                        {
                                         <li>
                                             <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalEliminar(lote)">
                                                 <i class="fa-solid fa-trash"></i> Eliminar
                                             </a>
                                         </li>
+                                        }
                                     </ul>
                                 </div>
                             </td>

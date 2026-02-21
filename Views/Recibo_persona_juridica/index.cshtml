@@ -75,11 +75,14 @@
                                                 <i class="fa-solid fa-print"></i> Imprimir
                                             </a>
                                         </li>
+                                         @if (User.IsInRole("Administrador"))
+                                        {
                                         <li>
                                             <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalEliminar(recibo)">
                                                 <i class="fa-solid fa-trash"></i> Eliminar
                                             </a>
                                         </li>
+                                        }
                                     </ul>
                                 </div>
                             </td>

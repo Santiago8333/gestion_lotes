@@ -100,6 +100,7 @@ public async Task<IActionResult> Agregar([Bind("n_lote,marca,modelo,dominio,anio
         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
+[Authorize(Policy = "Administrador")]
 [HttpDelete]
 [Route("api/lotes/{id}")]
 public async Task<IActionResult> EliminarLote(int id)

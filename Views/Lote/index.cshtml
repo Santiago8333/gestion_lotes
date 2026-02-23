@@ -343,6 +343,7 @@
                     // ¡Éxito!
                     this.modalAgregarBS.hide();
                     form.reset();
+                    this.limpiarLote();
                     this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
                     this.cargarLotes();
 
@@ -388,6 +389,7 @@
                     
                     this.modalModificarBS.hide();
                     form.reset();
+                    this.limpiarLoteM();
                     this.mostrarToast("Lote modificado exitosamente");
                     this.cargarLotes();
                     
@@ -428,6 +430,18 @@
                     console.error('Error al eliminar:', error);
                 }
             
+            },
+            limpiarLote(){
+                const form = document.getElementById('formAgregarLote');
+                if (form) {
+                    form.classList.remove('was-validated');
+                }
+            },
+            limpiarLoteM(){
+                const form = document.getElementById('formModificarLote');
+                if (form) {
+                    form.classList.remove('was-validated');
+                }
             }
         }
     };

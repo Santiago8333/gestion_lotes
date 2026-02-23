@@ -1801,6 +1801,18 @@
             this.porcentajeLote = 30;
             this.resetearFormasPago();
         },
+        limpiarRecibo(){
+            const form = document.getElementById('formAgregarRecibo');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
+        limpiarReciboM(){
+            const form = document.getElementById('formModificarRecibo');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
         limpiarLoteModificar() {
             this.reciboAModificar.lote = null;
             //this.reciboAModificar.id_lote = null;
@@ -1954,6 +1966,7 @@
                 // ¡Éxito!
                 this.modalAgregarBS.hide();
                 form.reset();
+                this.limpiarRecibo();
                 this.limpiarLote();
                 this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
                 this.cargarRecibo();
@@ -2214,6 +2227,7 @@
                     
                     this.modalModificarBS.hide();
                     form.reset();
+                    this.limpiarReciboM();
                     this.mostrarToast("Recibo modificado exitosamente");
                     this.cargarRecibo();
                     

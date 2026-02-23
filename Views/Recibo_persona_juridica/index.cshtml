@@ -1829,6 +1829,7 @@
                 
                 this.modalModificarBS.hide();
                 form.reset();
+                this.limpiarReciboM();
                 this.mostrarToast("Recibo modificado exitosamente");
                 this.cargarRecibo();
                 
@@ -2194,6 +2195,7 @@
                         // ¡Éxito!
                         this.modalAgregarBS.hide();
                         form.reset();
+                        this.limpiarRecibo();
                         this.limpiarLote();
                         this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
                         this.cargarRecibo();
@@ -2236,7 +2238,19 @@
                 } catch (error) {
                     console.error('Error al eliminar:', error);
                 }
-        }
+        },
+        limpiarRecibo(){
+            const form = document.getElementById('formAgregarRecibo');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
+        limpiarReciboM(){
+            const form = document.getElementById('formModificarRecibo');
+            if (form) {
+                form.classList.remove('was-validated');
+            }
+        },
 
          }
            

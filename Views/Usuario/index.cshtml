@@ -380,6 +380,7 @@
                     this.mostrarToast(data.mensaje); // Mostramos el toast de éxito
                     this.cargarUsuarios(); // Recargamos la tabla (sin recargar la página)
                     form.reset(); // Limpiamos el formulario
+                    this.limpiarUsuario();
 
                 } catch (error) {
                     console.error('Error al crear usuario:', error);
@@ -418,11 +419,24 @@
                     this.mostrarToast(data.mensaje); 
                     this.cargarUsuarios(); 
                     document.getElementById('mod_AvatarFile').value = "";
+                    this.limpiarUsuarioM();
                     
                 } catch (error) {
                     console.error('Error al modificar usuario:', error);
                     this.modalModificar.hide();
                     this.mostrarToast(error.message); // [cite: 60]
+                }
+            },
+            limpiarUsuario(){
+                const form = document.getElementById('formAgregarUsuario');
+                if (form) {
+                    form.classList.remove('was-validated');
+                }
+            },
+            limpiarUsuarioM(){
+                const form = document.getElementById('formModificarUsuario');
+                if (form) {
+                    form.classList.remove('was-validated');
                 }
             }
         }

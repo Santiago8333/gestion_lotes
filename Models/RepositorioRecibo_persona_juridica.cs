@@ -193,7 +193,7 @@ public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaReposi
                 // reciboExistente.fecha_modificacion = DateTime.Now; 
                 // reciboExistente.modificado_por = usuarioModificador;
                 var pagosAnteriores = await _context.Forma_Pagos
-                    .Where(x => x.id_recibo_persona_fisica == idRecibo)
+                    .Where(x => x.id_recibo_persona_juridica == idRecibo)
                     .ToListAsync();
 
                 

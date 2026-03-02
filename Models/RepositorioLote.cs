@@ -108,6 +108,7 @@ namespace gestion_lotes.Models
 
         return loteEnDb;
     }
+    /*
     public async Task<IEnumerable<Lotes>> BuscarLotesGeneralAsync(string terminoBusqueda)
     {
         
@@ -130,6 +131,34 @@ namespace gestion_lotes.Models
             
             query = query.Where(l => l.marca.Contains(terminoBusqueda));
             
+        }
+
+        return await query.ToListAsync();
+    }
+    */
+    public async Task<IEnumerable<Lotes>> BuscarLotesGeneralAsync(string terminoBusqueda)
+    {
+        if (string.IsNullOrWhiteSpace(terminoBusqueda))
+        {
+            return new List<Lotes>();
+        }
+
+        bool esNumero = int.TryParse(terminoBusqueda, out int numeroLote);
+
+        var query = _context.Lotes
+            .Where(l => 
+                l.estado == true &&
+                !_context.Recibo_persona_fisica.Any(rf => rf.id_lote == l.id_lote) && 
+                !_context.Recibo_persona_juridica.Any(rj => rj.id_lote == l.id_lote)
+            );
+
+        if (esNumero)
+        {
+            query = query.Where(l => l.n_lote == numeroLote || l.marca.Contains(terminoBusqueda));
+        }
+        else
+        {
+            query = query.Where(l => l.marca.Contains(terminoBusqueda));
         }
 
         return await query.ToListAsync();

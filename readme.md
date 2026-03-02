@@ -5,7 +5,7 @@ Administrador: acceso completo; crea empleados y elimina entidades.
 
 Empleado: acceso limitado; puede gestionar lotes y recibos, pero no eliminar registros críticos ni administrar usuarios.
 
-los usuarios podrán crear recibos y modificarlos, pero no podrán eliminarlos 
+los usuarios podrán crear recibos y modificarlos, pero no podrán eliminarlos pero podran hacer baja logicas,
 para ingresar al sistema el administrador deberá crear una cuenta de empleado
 y ingresar con la contraseña
 

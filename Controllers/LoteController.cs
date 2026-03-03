@@ -165,4 +165,48 @@ public async Task<IActionResult> Modificar(int id_lote,[Bind("id_lote,n_lote,mar
         return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
+[HttpPut]
+[Route("api/desactivarlote/{id}")]
+public async Task<IActionResult> DesactivarLote(int id)
+{
+    try
+    {
+
+        var lote = await repo.ObtenerPorNloteAsync(id);
+        if (lote == null)
+        {
+            return NotFound(new { mensaje = "El lote no fue encontrado." });
+        }
+        
+        await repo.DesactivarLote(id);
+
+        return Ok(new { mensaje = "Lote desactivado exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar desactivar el lote."+ex });
+    }
+}
+[HttpPut]
+[Route("api/activarlote/{id}")]
+public async Task<IActionResult> ActivarLote(int id)
+{
+    try
+    {
+
+        var lote = await repo.ObtenerPorNloteAsync(id);
+        if (lote == null)
+        {
+            return NotFound(new { mensaje = "El lote no fue encontrado." });
+        }
+        
+        await repo.ActivarLote(id);
+
+        return Ok(new { mensaje = "Lote activado exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar activar el lote."+ex });
+    }
+}
 }

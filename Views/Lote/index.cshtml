@@ -61,13 +61,13 @@
                                         </li>
                                         }
                                         <li v-if="lote.estado === true">
-                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalDesactivar(lote)">
                                                 <i class="fa-solid fa-x"></i> Desactivar
                                             </a>
                                         </li>
                                         
                                         <li v-if="lote.estado === false">
-                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalActivar(lote)">
                                                 <i class="fa-solid fa-check"></i> Activar
                                             </a>
                                         </li>
@@ -112,6 +112,42 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <a id="confirmDeleteButton" href="#" class="btn btn-danger">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal desactivar-->
+<div class="modal fade" id="confirmDesactivarModal" tabindex="-1" aria-labelledby="confirmDesactivarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDesactivarModalLabel">Confirmar Desactivar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas Desactivar este Lote?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmDesactivarButton" href="#" class="btn btn-danger">Desactivar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Activar-->
+<div class="modal fade" id="confirmActivarModal" tabindex="-1" aria-labelledby="confirmActivarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmActivarModalLabel">Confirmar Activar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas Activar este Lote?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmActivarButton" href="#" class="btn btn-danger">Activar</a>
       </div>
     </div>
   </div>
@@ -248,12 +284,16 @@
                 // Variables para manejar los modales
                 loteAEliminar: null,
                 loteAModificar: null, // Aquí guardaremos el lote que se está editando
+                loteADesactivar: null,
+                loteAActivar: null,
                 
                 // Referencias a las instancias de Bootstrap Modal
                 modalEliminarBS: null,
                 modalAgregarBS: null,
                 modalModificarBS: null,
-                
+                modalDesactivarBS: null,
+                modalActivarBS: null,
+
                 toastBS: null,
                 textoBusqueda: '',
                 timerBusqueda: null,
@@ -270,6 +310,8 @@
             this.modalAgregarBS = new bootstrap.Modal(document.getElementById('agregarModal'));
             this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            this.modalDesactivarBS = new bootstrap.Modal(document.getElementById('confirmDesactivarModal'));
+            this.modalActivarBS = new bootstrap.Modal(document.getElementById('confirmActivarModal'));
         },
         methods: {
             // --- Carga de datos ---
@@ -420,7 +462,20 @@
                 const btnEliminar = document.getElementById('confirmDeleteButton');
                 btnEliminar.onclick = () => this.eliminarLoteConfirmado();
             },
-
+            //logica del modal desactivar
+            mostrarModalDesactivar(lote){
+                this.loteADesactivar = lote;
+                this.modalDesactivarBS.show();
+                const btnEliminar = document.getElementById('confirmDesactivarButton');
+                btnEliminar.onclick = () => this.desactivarLoteConfirmado();
+            },
+            //logica del modal Activar
+            mostrarModalActivar(lote){
+                this.loteAActivar= lote;
+                this.modalActivarBS.show();
+                const btnEliminar = document.getElementById('confirmActivarButton');
+                btnEliminar.onclick = () => this.activarLoteConfirmado();
+            },
             async eliminarLoteConfirmado() {
                 if (!this.loteAEliminar) return;
 
@@ -439,6 +494,48 @@
                     this.cambiarPagina(1);
                 } catch (error) {
                     console.error('Error al eliminar:', error);
+                }
+            
+            },
+            async desactivarLoteConfirmado() {
+                if (!this.loteADesactivar) return;
+
+                try {
+                    const response = await fetch(`/api/desactivarlote/${this.loteADesactivar.id_lote}`, {
+                        method: 'PUT'
+                    });
+
+                    if (!response.ok) throw new Error('No se pudo desactivar el lote.');
+                    
+                    const data = await response.json();
+                    
+                    this.modalDesactivarBS.hide();
+                    this.mostrarToast(data.mensaje); 
+                    this.cargarLotes();
+                    this.cambiarPagina(1);
+                } catch (error) {
+                    console.error('Error al desactivar:', error);
+                }
+            
+            },
+            async activarLoteConfirmado() {
+                if (!this.loteAActivar) return;
+
+                try {
+                    const response = await fetch(`/api/activarlote/${this.loteAActivar.id_lote}`, {
+                        method: 'PUT'
+                    });
+
+                    if (!response.ok) throw new Error('No se pudo activar el lote.');
+                    
+                    const data = await response.json();
+                    
+                    this.modalActivarBS.hide();
+                    this.mostrarToast(data.mensaje); 
+                    this.cargarLotes();
+                    this.cambiarPagina(1);
+                } catch (error) {
+                    console.error('Error al activar:', error);
                 }
             
             },

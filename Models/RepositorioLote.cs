@@ -15,6 +15,8 @@ namespace gestion_lotes.Models
         Task<int> EliminarDirecto(int id);
         Task<Lotes?> Modificar(Lotes lote);
         Task<IEnumerable<Lotes>> BuscarLotesGeneralAsync(string terminoBusqueda);
+        Task<Lotes?> DesactivarLote(int idLote);
+        Task<Lotes?> ActivarLote(int idLote);
     }
 
     public class RepositorioLote : ILoteRepositorio

@@ -33,7 +33,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(lote, index) in lotes" :key="lote.id_lote">
+                        <tr v-for="(lote, index) in lotes" :key="lote.id_lote" :class="{ 'table-danger': lote.estado === false }">
                             <td>{{ lote.n_lote }}</td>
                             <td>{{ lote.marca }}</td>
                             <td>{{ lote.modelo }}</td>
@@ -60,6 +60,17 @@
                                             </a>
                                         </li>
                                         }
+                                        <li v-if="lote.estado === true">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="">
+                                                <i class="fa-solid fa-x"></i> Desactivar
+                                            </a>
+                                        </li>
+                                        
+                                        <li v-if="lote.estado === false">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="">
+                                                <i class="fa-solid fa-check"></i> Activar
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>

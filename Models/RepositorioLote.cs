@@ -163,6 +163,38 @@ namespace gestion_lotes.Models
 
         return await query.ToListAsync();
     }
+     public async Task<Lotes?> DesactivarLote(int idLote)
+    {
+
+        var loteEnDb = await _context.Lotes.FindAsync(idLote);
+
+        if (loteEnDb == null)
+        {
+            return null;
+        }
+
+        loteEnDb.estado = false; 
+        
+        await _context.SaveChangesAsync();
+
+        return loteEnDb;
+    }
+    public async Task<Lotes?> ActivarLote(int idLote)
+    {
+
+        var loteEnDb = await _context.Lotes.FindAsync(idLote);
+
+        if (loteEnDb == null)
+        {
+            return null;
+        }
+
+        loteEnDb.estado = true; 
+        
+        await _context.SaveChangesAsync();
+
+        return loteEnDb;
+    }
     
     }
 }

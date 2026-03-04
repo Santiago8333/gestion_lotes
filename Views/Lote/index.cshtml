@@ -17,6 +17,19 @@
                         v-on:input="buscarConRetraso"
                         >
                 </div>
+                <div class="col-md-6 mb-3">
+                    <label for="estado" class="form-label">Filtrar por Estado</label>
+                    <select 
+                        id="estado" 
+                        class="form-select" 
+                        v-model="estadoSeleccionado" 
+                        v-on:change="buscarConRetraso"
+                    >
+                        <option value="">Todos</option>
+                        <option value="true" selected>Activos</option>
+                        <option value="false">Desactivados</option>
+                    </select>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
@@ -28,6 +41,7 @@
                             <th scope="col">Dominio</th>
                             <th scope="col">Año</th>
                             <th scope="col">Base</th>
+                            <th scope="col">Creado Por</th>
                             <th scope="col">Fecha de Creación</th>
                             <th scope="col">Acción</th>
                         </tr>
@@ -40,6 +54,10 @@
                             <td>{{ lote.dominio }}</td>
                             <td>{{ lote.anio }}</td>
                             <td>{{ lote.base }}</td>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <td>{{ lote.creado_por }}</td>
+                            }
                             <td>{{ formatearFecha(lote.fecha_creacion) }}</td>
                             <td>
                                 <div class="dropdown position-static">
@@ -286,6 +304,7 @@
                 loteAModificar: null, // Aquí guardaremos el lote que se está editando
                 loteADesactivar: null,
                 loteAActivar: null,
+                estadoSeleccionado: 'true',
                 
                 // Referencias a las instancias de Bootstrap Modal
                 modalEliminarBS: null,
@@ -334,6 +353,10 @@
                         } else {
                             url += `&marca=${encodeURIComponent(valor)}`;
                         }
+                    }
+                    if(this.estadoSeleccionado){
+                        const valor = this.estadoSeleccionado.trim();
+                        url += `&estado=${encodeURIComponent(valor)}`;
                     }
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar');

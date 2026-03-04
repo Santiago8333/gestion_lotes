@@ -18,6 +18,19 @@
                         v-on:input="buscarConRetraso"
                         >
                 </div>
+                <div class="col-md-6 mb-3">
+                    <label for="estado" class="form-label">Filtrar por Estado</label>
+                    <select 
+                        id="estado" 
+                        class="form-select" 
+                        v-model="estadoSeleccionado" 
+                        v-on:change="buscarConRetraso"
+                    >
+                        <option value="">Todos</option>
+                        <option value="true" selected>Activos</option>
+                        <option value="false">Desactivados</option>
+                    </select>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
@@ -1362,6 +1375,7 @@
                 resultadosBusqueda: [],
                 precioSubastado: 0,
                 porcentajeLote: 30,
+                estadoSeleccionado: true,
                 // Variables para manejar los modales
                 reciboAEliminar: null,
                 reciboAModificar: null, // Aquí guardaremos el lote que se está editando
@@ -1989,6 +2003,10 @@
                         } else {
                             url += `&apellido=${encodeURIComponent(valor)}`;
                         }
+                    }
+                    if(this.estadoSeleccionado){
+                        const valor = this.estadoSeleccionado.trim();
+                        url += `&estado=${encodeURIComponent(valor)}`;
                     }
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar los recibos');

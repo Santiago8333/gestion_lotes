@@ -31,11 +31,11 @@ public IActionResult Index()
 }
 [HttpGet]
 [Route("api/lotes")]
-public async Task<IActionResult> ObtenerLotes(int pagina = 1,string? marca = null, string? numeroLote = null)
+public async Task<IActionResult> ObtenerLotes(int pagina = 1,string? marca = null, string? numeroLote = null,string? estado = null)
 {
     int registrosPorPagina = 5;
 
-    var consultaLotes = repo.ObtenerTodos(marca,numeroLote).OrderBy(u => u.n_lote);
+    var consultaLotes = repo.ObtenerTodos(marca,numeroLote,estado).OrderBy(u => u.n_lote);
     var totalDeRegistros = await consultaLotes.CountAsync();
 
     var lotesPaginados = await consultaLotes

@@ -13,7 +13,7 @@ namespace gestion_lotes.Models
         Task<int> EliminarDirecto(int id);
         Task<Recibo_persona_fisica> CrearReciboConPagos(CrearReciboRequest request,string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
-        IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null);
+        IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null,string? numeroLote = null,string? estado = null);
         Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
         Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir);
         Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExcluir = null, int? idReciboJuridicaExcluir = null);
@@ -30,7 +30,7 @@ namespace gestion_lotes.Models
         {
             return _context.Recibo_persona_fisica;
         }
-       public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null, string? numeroLote = null)
+       public IQueryable<Recibo_persona_fisica> ObtenerTodosyFormasPagosyLotes(string? apellido = null, string? numeroLote = null,string? estado = null)
         {
             var query = _context.Recibo_persona_fisica
                 .AsNoTracking()
@@ -47,7 +47,13 @@ namespace gestion_lotes.Models
             {
                 query = query.Where(r => r.Lote != null && r.Lote.n_lote.ToString().Contains(numeroLote.Trim()));
             }
-
+            if (!string.IsNullOrEmpty(estado))
+            {
+                if (bool.TryParse(estado, out bool estadoBooleano))
+                {
+                    query = query.Where(r => r.estado == estadoBooleano);
+                }
+            }
             return query;
         }
         public async Task<Recibo_persona_fisica?> ObtenerPorId(int id)

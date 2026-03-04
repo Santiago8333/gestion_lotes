@@ -8,7 +8,7 @@ namespace gestion_lotes.Models
 
     public interface ILoteRepositorio
     {
-        IQueryable<Lotes> ObtenerTodos(string? marca = null, string? numeroLote = null);
+        IQueryable<Lotes> ObtenerTodos(string? marca = null, string? numeroLote = null,string? estado = null);
         Task<Lotes?> ObtenerPorId(int id);
         Task<Lotes?> ObtenerPorNloteAsync(int n_lote);
         Task<Lotes> Agregar(Lotes lote);
@@ -29,7 +29,7 @@ namespace gestion_lotes.Models
         }
 
         
-        public IQueryable<Lotes> ObtenerTodos(string? marca = null, string? numeroLote = null)
+        public IQueryable<Lotes> ObtenerTodos(string? marca = null, string? numeroLote = null,string? estado = null)
         {
             var query = _context.Lotes.AsNoTracking().AsQueryable();
             if (!string.IsNullOrEmpty(marca))
@@ -41,6 +41,14 @@ namespace gestion_lotes.Models
             {
                 query = query.Where(r => r.n_lote.ToString().Contains(numeroLote.Trim()));
             }
+            if (!string.IsNullOrEmpty(estado))
+            {
+                if (bool.TryParse(estado, out bool estadoBooleano))
+                {
+                    query = query.Where(r => r.estado == estadoBooleano);
+                }
+            }
+
             return query;
         }
         public async Task<Lotes?> ObtenerPorId(int id)

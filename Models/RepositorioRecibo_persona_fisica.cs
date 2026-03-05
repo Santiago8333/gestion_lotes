@@ -17,6 +17,9 @@ namespace gestion_lotes.Models
         Task<Recibo_persona_fisica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestMd request, string usuarioModificador);
         Task<bool> ExisteReciboEnLoteMd(int idLote, int idReciboAExcluir);
         Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExcluir = null, int? idReciboJuridicaExcluir = null);
+        Task<Recibo_persona_fisica?> DesactivarRecibo(int idRecibo);
+        Task<Recibo_persona_fisica?> ActivarRecibo(int idRecibo);
+
     }
     public class RepositorioRecibo_persona_fisica : IRecibo_persona_fisicaRepositorio
     {
@@ -280,6 +283,38 @@ public async Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExclu
 
     return existeEnJuridica;
 }
+     public async Task<Recibo_persona_fisica?> DesactivarRecibo(int idRecibo)
+    {
+
+        var reciboEnDb = await _context.Recibo_persona_fisica.FindAsync(idRecibo);
+
+        if (reciboEnDb == null)
+        {
+            return null;
+        }
+
+        reciboEnDb.estado = false; 
+        
+        await _context.SaveChangesAsync();
+
+        return reciboEnDb;
+    }
+ public async Task<Recibo_persona_fisica?> ActivarRecibo(int idRecibo)
+    {
+
+        var reciboEnDb = await _context.Recibo_persona_fisica.FindAsync(idRecibo);
+
+        if (reciboEnDb == null)
+        {
+            return null;
+        }
+
+        reciboEnDb.estado = true; 
+        
+        await _context.SaveChangesAsync();
+
+        return reciboEnDb;
+    }
     }
     
 }

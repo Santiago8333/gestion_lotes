@@ -65,7 +65,7 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li>
+                                        <li v-if="lote.estado === true">
                                             <a class="dropdown-item"  href="javascript:void(0);" v-on:click="mostrarModalModificar(lote)">
                                                 <i class="fa-solid fa-pencil"></i> Modificar
                                             </a>
@@ -466,7 +466,7 @@
                     this.modalModificarBS.hide();
                     form.reset();
                     this.limpiarLoteM();
-                    this.mostrarToast("Lote modificado exitosamente");
+                    this.mostrarToast(data.mensaje);
                     this.cargarLotes();
                     
                 } catch (error) {

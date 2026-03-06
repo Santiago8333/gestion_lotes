@@ -150,6 +150,10 @@ public async Task<IActionResult> Modificar(int id_lote,[Bind("id_lote,n_lote,mar
     }
     try
     {
+        if (loteEnDb.estado == false)
+        {
+            return BadRequest(new { mensaje = "No se puede modificar un lote que está desactivado." });
+        }
 
         var loteModificado = await repo.Modificar(lote);
 

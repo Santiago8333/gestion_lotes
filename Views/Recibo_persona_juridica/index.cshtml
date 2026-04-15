@@ -18,6 +18,19 @@
                         v-on:input="buscarConRetraso"
                         >
                 </div>
+                <div class="col-md-6 mb-3">
+                    <label for="estado" class="form-label">Filtrar por Estado</label>
+                    <select 
+                        id="estado" 
+                        class="form-select" 
+                        v-model="estadoSeleccionado" 
+                        v-on:change="buscarConRetraso"
+                    >
+                        <option value="">Todos</option>
+                        <option value="true" selected>Activos</option>
+                        <option value="false">Desactivados</option>
+                    </select>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover table-sm">
@@ -40,7 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(recibo, index) in recibos" :key="recibo.id_recibo_persona_juridica">
+                        <tr v-for="(recibo, index) in recibos" :key="recibo.id_recibo_persona_juridica" :class="{ 'table-danger': recibo.estado === false }">
                             <td>{{ recibo.index }}</td>
                             <td>{{ recibo.razon_social }}</td>
                             <td>{{ recibo.apoderado_socio }}</td>
@@ -83,6 +96,16 @@
                                             </a>
                                         </li>
                                         }
+                                        <li v-if="recibo.estado === true">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalDesactivar(recibo)">
+                                                <i class="fa-solid fa-x"></i> Desactivar
+                                            </a>
+                                        </li>
+                                        <li v-if="recibo.estado === false">
+                                            <a href="javascript:void(0);" class="dropdown-item" v-on:click="mostrarModalActivar(recibo)">
+                                                <i class="fa-solid fa-check"></i> Activar
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </td>
@@ -1370,6 +1393,7 @@
                 resultadosBusqueda: [],
                 textoBusqueda: '',
                 timerBusqueda: null,
+                estadoSeleccionado: 'true',
                 //agregar recibo
                 pagos: {
                 gobierno: { 
@@ -2006,6 +2030,10 @@
                         } else {
                             url += `&razonSocial=${encodeURIComponent(valor)}`;
                         }
+                    }
+                    if(this.estadoSeleccionado){
+                        const valor = this.estadoSeleccionado.trim();
+                        url += `&estado=${encodeURIComponent(valor)}`;
                     }
                     const response = await fetch(url);
                     if (!response.ok) throw new Error('Error al cargar los recibos');

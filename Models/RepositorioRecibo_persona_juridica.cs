@@ -9,7 +9,7 @@ namespace gestion_lotes.Models
 public interface IRecibo_persona_juridicaRepositorio
     {
         IQueryable<Recibo_persona_juridica> ObtenerTodos();
-        IQueryable<Recibo_persona_juridica> ObtenerTodosyFormasPagosyLotes(string? razon_social = null, string? numeroLote = null);
+        IQueryable<Recibo_persona_juridica> ObtenerTodosyFormasPagosyLotes(string? razon_social = null, string? numeroLote = null,string? estado = null);
         Task<Recibo_persona_juridica> CrearReciboConPagos(CrearReciboRequestJuridica request, string usuarioCreador);
         Task<bool> ExisteReciboEnLote(int id);
         Task<int> EliminarDirecto(int id);
@@ -30,7 +30,7 @@ public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaReposi
         {
             return _context.Recibo_persona_juridica;
         }
-        public IQueryable<Recibo_persona_juridica> ObtenerTodosyFormasPagosyLotes(string? razon_social = null, string? numeroLote = null)
+        public IQueryable<Recibo_persona_juridica> ObtenerTodosyFormasPagosyLotes(string? razon_social = null, string? numeroLote = null,string? estado = null)
         {
             var query = _context.Recibo_persona_juridica
                 .AsNoTracking()
@@ -46,6 +46,13 @@ public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaReposi
             if (!string.IsNullOrEmpty(numeroLote))
             {
                 query = query.Where(r => r.Lote != null && r.Lote.n_lote.ToString().Contains(numeroLote.Trim()));
+            }
+            if (!string.IsNullOrEmpty(estado))
+            {
+                if (bool.TryParse(estado, out bool estadoBooleano))
+                {
+                    query = query.Where(r => r.estado == estadoBooleano);
+                }
             }
 
             return query;

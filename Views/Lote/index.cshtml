@@ -41,7 +41,10 @@
                             <th scope="col">Dominio</th>
                             <th scope="col">Año</th>
                             <th scope="col">Base</th>
+                             @if (User.IsInRole("Administrador"))
+                            {
                             <th scope="col">Creado Por</th>
+                            }
                             <th scope="col">Fecha de Creación</th>
                             <th scope="col">Acción</th>
                         </tr>

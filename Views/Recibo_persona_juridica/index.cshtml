@@ -133,6 +133,42 @@
             </li>
         </ul>
     </nav>
+        <!-- Modal desactivar-->
+<div class="modal fade" id="confirmDesactivarModal" tabindex="-1" aria-labelledby="confirmDesactivarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmDesactivarModalLabel">Confirmar Desactivar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas Desactivar este recibo?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmDesactivarButton" href="#" class="btn btn-danger">Desactivar</a>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Activar-->
+<div class="modal fade" id="confirmActivarModal" tabindex="-1" aria-labelledby="confirmActivarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmActivarModalLabel">Confirmar Activar</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ¿Estás seguro de que deseas Activar este recibo?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a id="confirmActivarButton" href="#" class="btn btn-danger">Activar</a>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Modal Agergar-->
 <div class="modal fade" id="agregarModal" tabindex="-1" aria-labelledby="agregarModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -1439,6 +1475,8 @@
             errorBusquedaModificar: null,
             resultadosBusquedaModificar: [],
             loteSeleccionadoModificar: null,
+            reciboADesactivar: null,
+            reciboActivar: null,
             pagosModificar: {
             gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
             cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
@@ -1457,6 +1495,8 @@
             this.modalEliminarBS = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
             this.modalDetalleBS = new bootstrap.Modal(document.getElementById('confirmDetalleModal'));
             this.modalModificarBS = new bootstrap.Modal(document.getElementById('modificarModal'));
+            this.modalDesactivarBS = new bootstrap.Modal(document.getElementById('confirmDesactivarModal'));
+            this.modalActivarBS = new bootstrap.Modal(document.getElementById('confirmActivarModal'));
         },
     computed: {
         sumaPagosGobiernoMod() {
@@ -2267,6 +2307,48 @@
                     console.error('Error al eliminar:', error);
                 }
         },
+        async desactivarReciboConfirmado() {
+                if (!this.reciboADesactivar) return;
+
+                try {
+                    const response = await fetch(`/api/desactivarreciboj/${this.reciboADesactivar.id_recibo_persona_juridica}`, {
+                        method: 'PUT'
+                    });
+
+                    if (!response.ok) throw new Error('No se pudo desactivar el lote.');
+                    
+                    const data = await response.json();
+                    
+                    this.modalDesactivarBS.hide();
+                    this.mostrarToast(data.mensaje); 
+                    this.cargarRecibo();
+                    this.cambiarPagina(1);
+                } catch (error) {
+                    console.error('Error al desactivar:', error);
+                }
+            
+            },
+            async activarReciboConfirmado() {
+                if (!this.reciboActivar) return;
+
+                try {
+                    const response = await fetch(`/api/activarreciboj/${this.reciboActivar.id_recibo_persona_juridica}`, {
+                        method: 'PUT'
+                    });
+
+                    if (!response.ok) throw new Error('No se pudo activar el recibo.');
+                    
+                    const data = await response.json();
+                    
+                    this.modalActivarBS.hide();
+                    this.mostrarToast(data.mensaje); 
+                    this.cargarRecibo();
+                    this.cambiarPagina(1);
+                } catch (error) {
+                    console.error('Error al activar:', error);
+                }
+            
+            },
         limpiarRecibo(){
             const form = document.getElementById('formAgregarRecibo');
             if (form) {
@@ -2279,6 +2361,21 @@
                 form.classList.remove('was-validated');
             }
         },
+        
+        //logica del modal desactivar
+        mostrarModalDesactivar(recibo){
+            this.reciboADesactivar = recibo;
+            this.modalDesactivarBS.show();
+            const btnEliminar = document.getElementById('confirmDesactivarButton');
+            btnEliminar.onclick = () => this.desactivarReciboConfirmado();
+        },
+        //logica del modal Activar
+        mostrarModalActivar(recibo){
+            this.reciboActivar= recibo;
+            this.modalActivarBS.show();
+            const btnEliminar = document.getElementById('confirmActivarButton');
+            btnEliminar.onclick = () => this.activarReciboConfirmado();
+        }
 
          }
            

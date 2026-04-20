@@ -169,4 +169,48 @@ public async Task<IActionResult> Modificar([FromBody] CrearReciboRequestJMd dato
          return StatusCode(500, new { mensaje = $"Error interno del servidor: {ex.Message}" });
     }
 }
+[HttpPut]
+[Route("api/desactivarreciboj/{id}")]
+public async Task<IActionResult> DesactivarRecibo(int id)
+{
+    try
+    {
+
+        var lote = await repo.ObtenerPorId(id);
+        if (lote == null)
+        {
+            return NotFound(new { mensaje = "El recibo no fue encontrado." });
+        }
+        
+        await repo.DesactivarRecibo(id);
+
+        return Ok(new { mensaje = "recibo desactivado exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar desactivar el recibo."+ex });
+    }
+}
+[HttpPut]
+[Route("api/activarreciboj/{id}")]
+public async Task<IActionResult> ActivarRecibo(int id)
+{
+    try
+    {
+
+        var lote = await repo.ObtenerPorId(id);
+        if (lote == null)
+        {
+            return NotFound(new { mensaje = "El recibo no fue encontrado." });
+        }
+        
+        await repo.ActivarRecibo(id);
+
+        return Ok(new { mensaje = "recibo activar exitosamente." });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { mensaje = "Ocurrió un error interno al intentar activar el recibo."+ex });
+    }
+}
 }

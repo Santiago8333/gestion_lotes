@@ -16,6 +16,8 @@ public interface IRecibo_persona_juridicaRepositorio
         Task<Recibo_persona_juridica?> ObtenerPorId(int id);
         Task<bool> ExisteLoteDuplicado(int idLote, int? idReciboFisicaExcluir = null, int? idReciboJuridicaExcluir = null);
         Task<Recibo_persona_juridica> ModificarReciboConPagos(int idRecibo, CrearReciboRequestJMd request, string usuarioModificador);
+        Task<Recibo_persona_juridica?> DesactivarRecibo(int idRecibo);
+        Task<Recibo_persona_juridica?> ActivarRecibo(int idRecibo);
     }
 
 public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaRepositorio
@@ -265,5 +267,38 @@ public class RepositorioRecibo_persona_juridica : IRecibo_persona_juridicaReposi
 
             return existeEnJuridica;
         }
+          public async Task<Recibo_persona_juridica?> DesactivarRecibo(int idRecibo)
+        {
+
+            var reciboEnDb = await _context.Recibo_persona_juridica.FindAsync(idRecibo);
+
+            if (reciboEnDb == null)
+            {
+                return null;
+            }
+
+            reciboEnDb.estado = false; 
+            
+            await _context.SaveChangesAsync();
+
+            return reciboEnDb;
+        }
+        public async Task<Recibo_persona_juridica?> ActivarRecibo(int idRecibo)
+    {
+
+        var reciboEnDb = await _context.Recibo_persona_juridica.FindAsync(idRecibo);
+
+        if (reciboEnDb == null)
+        {
+            return null;
+        }
+
+        reciboEnDb.estado = true; 
+        
+        await _context.SaveChangesAsync();
+
+        return reciboEnDb;
+    }
+
     }
 }

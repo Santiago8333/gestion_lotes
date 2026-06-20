@@ -187,20 +187,14 @@
             <label class="form-label fw-bold">Buscar Lote</label>
             
             <div class="input-group mb-2">
-                <input type="text" 
-                       class="form-control" 
-                       v-model="busquedaLote" 
+                <input type="text"
+                       class="form-control"
+                       v-model="busquedaLote"
                        placeholder="Ingrese N° de Lote"
-                       v-on:keypress.enter.prevent="buscarLote"> 
-                
-                <button class="btn btn-primary" 
-                        type="button" 
-                        v-on:click="buscarLote" 
-                        :disabled="cargando">
-                    <span v-if="cargando" class="spinner-border spinner-border-sm"></span>
-                    <span v-else>Buscar</span>
-                </button>
-                
+                       v-on:input="buscarLoteConRetraso">
+                <span class="input-group-text bg-white" v-if="cargando">
+                    <span class="spinner-border spinner-border-sm"></span>
+                </span>
             </div>
 
             <div v-if="errorBusqueda" class="text-danger small mb-2">
@@ -1451,6 +1445,7 @@
                 porcentajeLoteDetalle: 30,
                 textoBusqueda: '',
                 timerBusqueda: null,
+                timerBusquedaLote: null,
                 pagos: {
                 gobierno: { 
                     efectivo: 0, transferencia: 0, 
@@ -1767,11 +1762,24 @@
                 },
             buscarConRetraso() {
                 if (this.timerBusqueda) clearTimeout(this.timerBusqueda);
-                
+
                 this.timerBusqueda = setTimeout(() => {
-                    this.paginaActual = 1; 
+                    this.paginaActual = 1;
                     this.cargarRecibo();
-                }, 500); 
+                }, 500);
+            },
+            buscarLoteConRetraso() {
+                if (this.timerBusquedaLote) clearTimeout(this.timerBusquedaLote);
+
+                if (!this.busquedaLote) {
+                    this.resultadosBusqueda = [];
+                    this.errorBusqueda = null;
+                    return;
+                }
+
+                this.timerBusquedaLote = setTimeout(() => {
+                    this.buscarLote();
+                }, 500);
             },
             async buscarLote() {
                     if (!this.busquedaLote) return;

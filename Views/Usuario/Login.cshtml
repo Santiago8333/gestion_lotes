@@ -9,12 +9,12 @@
         </div>
         <div class="col-md-12">
             <label for="Email" class="form-label">Email</label>
-            <input type="Email" class="form-control" id="Email" v-model="loginEmail" required>
+            <input type="Email" class="form-control" id="Email" autocomplete="username" v-model="loginEmail" required>
             <div class="invalid-feedback">El Email es obligatorio.</div>
         </div>
         <div class="col-md-12">
             <label for="Clave" class="form-label">Password</label>
-            <input type="password" class="form-control" id="Clave" v-model="loginClave" required>
+            <input type="password" class="form-control" id="Clave" autocomplete="current-password" v-model="loginClave" required>
             <div class="invalid-feedback">El Password es obligatorio.</div>
         </div>
 

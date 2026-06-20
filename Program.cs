@@ -12,7 +12,6 @@ var connectionString = builder.Configuration.GetConnectionString("MySql");
 var serverVersion = new MySqlServerVersion(new Version(10, 4, 27));
 
 // 3. Registra el DbContext en el contenedor de servicios
-//    Aquí es donde EF Core "aprende" a conectarse a tu BD MySQL.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, serverVersion)
 );

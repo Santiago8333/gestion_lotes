@@ -108,12 +108,12 @@ public async Task<IActionResult> EliminarLote(int id)
     try
     {
 
-        var lote = await repo.ObtenerPorNloteAsync(id);
+        var lote = await repo.ObtenerPorId(id);
         if (lote == null)
         {
             return NotFound(new { mensaje = "El lote no fue encontrado." });
         }
-        
+
         await repo.EliminarDirecto(id);
 
         return Ok(new { mensaje = "Lote eliminado exitosamente." });
@@ -143,7 +143,7 @@ public async Task<IActionResult> Modificar(int id_lote,[Bind("id_lote,n_lote,mar
         return BadRequest(new { mensaje = "Datos inválidos: " + string.Join(", ", errores) });
     }
 
-    var loteEnDb = await repo.ObtenerPorNloteAsync(lote.n_lote);
+    var loteEnDb = await repo.ObtenerPorId(lote.id_lote);
     if (loteEnDb == null)
     {
         return NotFound(new { mensaje = "El lote que intentas modificar no existe." });
@@ -176,12 +176,12 @@ public async Task<IActionResult> DesactivarLote(int id)
     try
     {
 
-        var lote = await repo.ObtenerPorNloteAsync(id);
+        var lote = await repo.ObtenerPorId(id);
         if (lote == null)
         {
             return NotFound(new { mensaje = "El lote no fue encontrado." });
         }
-        
+
         await repo.DesactivarLote(id);
 
         return Ok(new { mensaje = "Lote desactivado exitosamente." });
@@ -198,12 +198,12 @@ public async Task<IActionResult> ActivarLote(int id)
     try
     {
 
-        var lote = await repo.ObtenerPorNloteAsync(id);
+        var lote = await repo.ObtenerPorId(id);
         if (lote == null)
         {
             return NotFound(new { mensaje = "El lote no fue encontrado." });
         }
-        
+
         await repo.ActivarLote(id);
 
         return Ok(new { mensaje = "Lote activado exitosamente." });

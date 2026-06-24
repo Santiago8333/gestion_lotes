@@ -83,6 +83,17 @@ namespace gestion_lotes.Models
             .Where(r => r.id_lote == idLote)
             .ExecuteDeleteAsync();
 
+            await _context.Forma_Pagos
+            .Where(fp => _context.Recibo_persona_juridica
+                .Where(r => r.id_lote == idLote)
+                .Select(r => r.id_recibo_persona_juridica)
+                .Contains(fp.id_recibo_persona_juridica ?? 0))
+            .ExecuteDeleteAsync();
+
+           await _context.Recibo_persona_juridica
+            .Where(r => r.id_lote == idLote)
+            .ExecuteDeleteAsync();
+
             var lotesEliminados = await _context.Lotes
                 .Where(u => u.id_lote == idLote)
                 .ExecuteDeleteAsync();

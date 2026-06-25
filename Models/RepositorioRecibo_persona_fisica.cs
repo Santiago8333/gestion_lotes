@@ -81,7 +81,11 @@ namespace gestion_lotes.Models
 
             try
             {
-                
+                // Porcentajes vigentes al momento de emitir: quedan congelados en el recibo.
+                var parametros = await _context.Parametros
+                    .OrderBy(p => p.id_parametros)
+                    .FirstOrDefaultAsync();
+
                 var nuevoRecibo = new Recibo_persona_fisica
                 {
                     id_lote = request.id_lote,
@@ -96,7 +100,9 @@ namespace gestion_lotes.Models
                     provincia = request.provincia,
                     precio_subastado = request.precio_subastado,
                     pago_lote = request.pago_lote,
-                    
+                    honorarios = parametros?.honorarios ?? 10m,
+                    sellado = parametros?.sellado ?? 0.6m,
+
                     // Campos automáticos
                     fecha_creacion = DateTime.Now,
                     estado = true,

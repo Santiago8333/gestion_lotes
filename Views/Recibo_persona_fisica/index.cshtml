@@ -267,18 +267,18 @@
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
-                       :value="montoHonorarios.toFixed(2)" 
+                <label class="form-label small fw-bold">Honorarios CMCPSL ({{ tasaHonorarios }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
+                       :value="montoHonorarios.toFixed(2)"
                        readonly>
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
-                       :value="montoSellado.toFixed(2)" 
+                <label class="form-label small fw-bold">Sellado DPIP ({{ tasaSellado }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
+                       :value="montoSellado.toFixed(2)"
                        readonly>
             </div>
         </div>
@@ -716,17 +716,17 @@
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
+                <label class="form-label small fw-bold">Honorarios CMCPSL ({{ tasaHonorariosDetalle }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
                        :value="montoHonorariosDetalle.toFixed(2)"
                        readonly>
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
+                <label class="form-label small fw-bold">Sellado DPIP ({{ tasaSelladoDetalle }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
                        :value="montoSelladoDetalle.toFixed(2)"
                        readonly>
             </div>
@@ -1082,18 +1082,18 @@
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Honorarios CMCPSL (10%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
-                       :value="montoHonorariosModificar.toFixed(2)" 
+                <label class="form-label small fw-bold">Honorarios CMCPSL ({{ tasaHonorariosModificar }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
+                       :value="montoHonorariosModificar.toFixed(2)"
                        readonly>
             </div>
 
             <div class="col-md-3">
-                <label class="form-label small fw-bold">Sellado DPIP (0.6%)</label>
-                <input type="text" 
-                       class="form-control form-control-sm bg-white" 
-                       :value="montoSelladoModificar.toFixed(2)" 
+                <label class="form-label small fw-bold">Sellado DPIP ({{ tasaSelladoModificar }}%)</label>
+                <input type="text"
+                       class="form-control form-control-sm bg-white"
+                       :value="montoSelladoModificar.toFixed(2)"
                        readonly>
             </div>
         </div>
@@ -1416,6 +1416,14 @@
                 resultadosBusqueda: [],
                 precioSubastado: 0,
                 porcentajeLote: 30,
+                // Tasas vigentes (en %) traídas desde /api/parametros (modal Agregar)
+                tasaHonorarios: 10,
+                tasaSellado: 0.6,
+                // Tasas guardadas en el recibo abierto (Detalle / Modificar)
+                tasaHonorariosDetalle: 10,
+                tasaSelladoDetalle: 0.6,
+                tasaHonorariosModificar: 10,
+                tasaSelladoModificar: 0.6,
                 estadoSeleccionado: 'true',
                 reciboADesactivar: null,
                 reciboActivar: null,
@@ -1477,7 +1485,8 @@
         },
         mounted() {
             this.cargarRecibo();
-            
+            this.cargarParametros();
+
             // Inicializar Toast
             const toastEl = document.getElementById('successToast');
             if (toastEl) this.toastBS = new bootstrap.Toast(toastEl);
@@ -1499,11 +1508,11 @@
         },
         montoHonorariosDetalle() {
             let precio = parseFloat(this.precioSubastadoDetalle) || 0;
-            return precio * 0.10;
+            return precio * (parseFloat(this.tasaHonorariosDetalle) / 100);
         },
         montoSelladoDetalle() {
             let precio = parseFloat(this.precioSubastadoDetalle) || 0;
-            return precio * 0.006;
+            return precio * (parseFloat(this.tasaSelladoDetalle) / 100);
         },
         totalPagarAhoraDetalle() {
             return this.montoPagoLoteDetalle + this.montoHonorariosDetalle + this.montoSelladoDetalle;
@@ -1519,12 +1528,12 @@
         },
         montoHonorariosModificar() {
             let precio = parseFloat(this.precioSubastadoModificar) || 0;
-            return precio * 0.10;
+            return precio * (parseFloat(this.tasaHonorariosModificar) / 100);
         },
-        // 3. Calcula el 0.6% fijo de Sellado
+        // 3. Calcula el Sellado según la tasa guardada en el recibo
         montoSelladoModificar() {
             let precio = parseFloat(this.precioSubastadoModificar) || 0;
-            return precio * 0.006;
+            return precio * (parseFloat(this.tasaSelladoModificar) / 100);
         },
         totalPagarAhoraModificar() {
             return this.montoPagoLoteModificar + this.montoHonorariosModificar + this.montoSelladoModificar;
@@ -1541,16 +1550,16 @@
             return precio * (porcentaje / 100);
         },
 
-        // 2. Calcula el 10% fijo de Honorarios
+        // 2. Calcula los Honorarios según la tasa vigente (%)
         montoHonorarios() {
             let precio = parseFloat(this.precioSubastado) || 0;
-            return precio * 0.10;
+            return precio * (parseFloat(this.tasaHonorarios) / 100);
         },
 
-        // 3. Calcula el 0.6% fijo de Sellado
+        // 3. Calcula el Sellado según la tasa vigente (%)
         montoSellado() {
             let precio = parseFloat(this.precioSubastado) || 0;
-            return precio * 0.006;
+            return precio * (parseFloat(this.tasaSellado) / 100);
         },
 
         // 4. Suma los tres anteriores para el total que debe poner la persona YA
@@ -1621,15 +1630,28 @@
     faltaDPIPMod() { return this.montoSelladoModificar - this.sumaPagosDPIPMod; }
     },
         methods: {
+            async cargarParametros() {
+                try {
+                    const response = await fetch('/api/parametros');
+                    if (!response.ok) throw new Error('Error al cargar parámetros');
+                    const data = await response.json();
+                    this.tasaHonorarios = parseFloat(data.honorarios);
+                    this.tasaSellado = parseFloat(data.sellado);
+                } catch (error) {
+                    console.error('No se pudieron cargar los parámetros:', error);
+                }
+            },
             imprimirRecibo(recibo) {
                 //calcular pago lote
                 let precio = parseFloat(recibo.precio_subastado) || 0;
                 let porcentaje = parseFloat(recibo.pago_lote) || 0;
                 recibo.pago_lotee =  precio * (porcentaje / 100);
-                //calcular honorarios
-                recibo.honorarios = precio * 0.10;
+                //calcular honorarios segun la tasa guardada en el recibo (%)
+                let tasaHonorarios = parseFloat(recibo.honorarios) || 0;
+                let tasaSellado = parseFloat(recibo.sellado) || 0;
+                recibo.montoHonorarios = precio * (tasaHonorarios / 100);
                 //caclular sellado
-                recibo.sellado =  precio * 0.006;
+                recibo.montoSellado =  precio * (tasaSellado / 100);
 
                     const contenidoHtml = `
                         <div id="impresion-recibo">
@@ -1644,16 +1666,16 @@
                                     <tr style="background-color: #f8f9fa;">
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">% Pago Lote</th>
                                         <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Pago Lote ($)</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Honorarios CMCPSL (10%)</th>
-                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sellado DPIP (0.6%)</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Honorarios CMCPSL (${tasaHonorarios}%)</th>
+                                        <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Sellado DPIP (${tasaSellado}%)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td style="border: 1px solid #ddd; padding: 8px;">% ${recibo.pago_lote}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.pago_lotee}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.honorarios}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.sellado}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.montoHonorarios.toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">$ ${recibo.montoSellado.toFixed(2)}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2111,6 +2133,8 @@
                 this.reciboADetalle = recibo;
                 this.precioSubastadoDetalle = recibo.precio_subastado;
                 this.porcentajeLoteDetalle = recibo.pago_lote;
+                this.tasaHonorariosDetalle = recibo.honorarios;
+                this.tasaSelladoDetalle = recibo.sellado;
                 this.pagosDetalle = {
                     gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
                     cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
@@ -2143,6 +2167,8 @@
                 this.reciboAModificar = JSON.parse(JSON.stringify(recibo));
                 this.precioSubastadoModificar = recibo.precio_subastado;
                 this.porcentajeLoteModificar = recibo.pago_lote;
+                this.tasaHonorariosModificar = recibo.honorarios;
+                this.tasaSelladoModificar = recibo.sellado;
                 this.pagosModificar = {
                     gobierno: { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },
                     cmcpsl:   { efectivo: 0, transferencia: 0, dolar_monto: 0, dolar_cotizacion: 0, euro_monto: 0, euro_cotizacion: 0 },

@@ -37,7 +37,10 @@ public class Recibo_persona_juridica
     [Required(ErrorMessage = "El precio subastado de recibo es obligatorio.")]
     public decimal precio_subastado { get; set; }
     public bool estado { get; set; }
-    
+    // Porcentajes vigentes al momento de emitir el recibo (copiados desde Parametros).
+    public decimal honorarios { get; set; } = 10m;
+    public decimal sellado { get; set; } = 0.6m;
+
     [ForeignKey("id_lote")]
     public virtual Lotes? Lote { get; set; }
     public virtual ICollection<Forma_Pagos>? FormasDePago { get; set; }

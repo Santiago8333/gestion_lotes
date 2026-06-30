@@ -17,7 +17,7 @@ se podrá agregar varias una forma de pago para recibo de forma física y juríd
 solo se programo la logica de usuario y la parte de administracion de estos 
 la vista Usuario esta bloqueda para empleados
 cuentas
-admin: admin@admin contraseña:1234
+admin: admin@gmail.com contraseña:1234
 empleado: test@test contraseña:123
 
 ---

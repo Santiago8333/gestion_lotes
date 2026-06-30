@@ -19,3 +19,11 @@ la vista Usuario esta bloqueda para empleados
 cuentas
 admin: admin@admin contraseña:1234
 empleado: test@test contraseña:123
+
+---
+Parámetros
+
+Los porcentajes de Honorarios CMCPSL y Sellado DPIP se guardan en la tabla `parametros`
+en vez de estar fijos en el código. Solo el administrador puede modificarlos desde la
+pantalla "Parámetros". Cada recibo guarda una copia de estos valores al momento de
+crearse, así un cambio futuro no afecta recibos ya emitidos.
